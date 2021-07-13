@@ -164,6 +164,10 @@ function initWalletCapture({ props, components, payment, serviceData, config } :
         return fallbackToWebCheckout();
     };
 
+    const close = () => {
+        return ZalgoPromise.resolve();
+    };
+
     const shippingRequired = (orderID) => {
         return getSupplementalOrderInfo(orderID).then(order => {
             const { flags: { isChangeShippingAddressAllowed } } = order.checkoutSession;
@@ -213,7 +217,7 @@ function initWalletCapture({ props, components, payment, serviceData, config } :
 
     return {
         start,
-        close: () => ZalgoPromise.resolve()
+        close
     };
 }
 

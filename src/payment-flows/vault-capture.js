@@ -125,6 +125,10 @@ function initVaultCapture({ props, components, payment, serviceData, config } : 
         });
     };
 
+    const close = () => {
+        return ZalgoPromise.resolve();
+    };
+
     const fallbackToWebCheckout = () => {
         getLogger().info('web_checkout_fallback').flush();
         return checkout.init({ props, components, serviceData, payment: { ...payment, isClick: false, buyerIntent: BUYER_INTENT.PAY_WITH_DIFFERENT_FUNDING_SHIPPING }, config }).start();
@@ -157,7 +161,7 @@ function initVaultCapture({ props, components, payment, serviceData, config } : 
 
             const { status, body } = validate;
             return handleValidateResponse({ ThreeDomainSecure, status, body, createOrder, getParent }).then(() => {
-                return onApprove({}, { restart });
+                return onApprove({}, { restart, close });
             });
         });
     };
@@ -188,7 +192,7 @@ function initVaultCapture({ props, components, payment, serviceData, config } : 
 
     return {
         start,
-        close: () => ZalgoPromise.resolve()
+        close
     };
 }
 

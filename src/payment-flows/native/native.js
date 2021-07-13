@@ -99,7 +99,7 @@ function initNative({ props, components, config, payment, serviceData } : InitOp
             .flush();
 
         const data = { payerID, paymentID, billingToken, forceRestAPI: true };
-        const actions = { restart: () => fallbackToWebCheckout() };
+        const actions = { restart: () => fallbackToWebCheckout(), close: destroy };
         return ZalgoPromise.all([
             onApprove(data, actions).catch(err => {
                 getLogger().info(`native_message_onapprove_error`, { payerID, paymentID, billingToken })

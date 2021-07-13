@@ -419,7 +419,7 @@ function initApplePay({ props, payment, serviceData } : InitOptions) : PaymentFl
                                         });
 
                                         const data = {};
-                                        const actions = { restart: () => ZalgoPromise.try(setupApplePaySession) };
+                                        const actions = { restart: () => ZalgoPromise.try(setupApplePaySession), close };
                                         
                                         return ZalgoPromise.all([
                                             onApprove(data, actions),

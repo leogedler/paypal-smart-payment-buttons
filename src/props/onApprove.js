@@ -44,7 +44,8 @@ export type XOnApproveActionsType = {|
         activate : () => ZalgoPromise<SubscriptionResponse>
     |},
     restart : () => ZalgoPromise<void>,
-    redirect : (string) => ZalgoPromise<void>
+    redirect : (string) => ZalgoPromise<void>,
+    close? : () => ZalgoPromise<void>
 |};
 
 type ActionOptions = {|
@@ -52,6 +53,7 @@ type ActionOptions = {|
     paymentID : ?string,
     payerID : ?string,
     restart : () => ZalgoPromise<void>,
+    close? : () => ZalgoPromise<void>,
     intent : $Values<typeof INTENT>,
     subscriptionID : ?string,
     facilitatorAccessToken : string,
@@ -145,7 +147,7 @@ function buildPaymentActions({ intent, paymentID, payerID, restart, facilitatorA
 
 export type XOnApprove = (XOnApproveDataType, XOnApproveActionsType) => ZalgoPromise<void>;
 
-function buildXApproveActions({ intent, orderID, paymentID, payerID, restart, subscriptionID, facilitatorAccessToken, buyerAccessToken, partnerAttributionID, forceRestAPI } : ActionOptions) : XOnApproveActionsType {
+function buildXApproveActions({ intent, orderID, paymentID, payerID, restart, close, subscriptionID, facilitatorAccessToken, buyerAccessToken, partnerAttributionID, forceRestAPI } : ActionOptions) : XOnApproveActionsType {
 
     const getSubscriptionApi = memoize(() => {
         if (!subscriptionID) {
@@ -186,6 +188,7 @@ function buildXApproveActions({ intent, orderID, paymentID, payerID, restart, su
         payment:      ENABLE_PAYMENT_API ? payment : null,
         subscription: { get: getSubscriptionApi, activate: activateSubscriptionApi },
         restart,
+        close,
         redirect
     };
 }
@@ -202,7 +205,8 @@ export type OnApproveData = {|
 |};
 
 export type OnApproveActions = {|
-    restart : () => ZalgoPromise<void>
+    restart : () => ZalgoPromise<void>,
+    close? : () => ZalgoPromise<void>
 |};
 
 export type OnApprove = (OnApproveData, OnApproveActions) => ZalgoPromise<void>;
@@ -236,7 +240,7 @@ export function getOnApprove({ intent, onApprove = getDefaultOnApprove(intent), 
     
     const upgradeLSAT = LSAT_UPGRADE_EXCLUDED_MERCHANTS.indexOf(clientID) === -1;
 
-    return memoize(({ payerID, paymentID, billingToken, subscriptionID, buyerAccessToken, authCode, forceRestAPI = upgradeLSAT } : OnApproveData, { restart } : OnApproveActions) => {
+    return memoize(({ payerID, paymentID, billingToken, subscriptionID, buyerAccessToken, authCode, forceRestAPI = upgradeLSAT } : OnApproveData, { restart, close } : OnApproveActions) => {
         return ZalgoPromise.try(() => {
             return createOrder();
         }).then(orderID => {
@@ -261,7 +265,7 @@ export function getOnApprove({ intent, onApprove = getDefaultOnApprove(intent), 
                 paymentID = paymentID || (supplementalData && supplementalData.checkoutSession && supplementalData.checkoutSession.cart && supplementalData.checkoutSession.cart.paymentId);
 
                 const data = { orderID, payerID, paymentID, billingToken, subscriptionID, facilitatorAccessToken, authCode };
-                const actions = buildXApproveActions({ orderID, paymentID, payerID, intent, restart, subscriptionID, facilitatorAccessToken, buyerAccessToken, partnerAttributionID, forceRestAPI });
+                const actions = buildXApproveActions({ orderID, paymentID, payerID, intent, restart, close, subscriptionID, facilitatorAccessToken, buyerAccessToken, partnerAttributionID, forceRestAPI });
 
                 return onApprove(data, actions).catch(err => {
                     return ZalgoPromise.try(() => {
