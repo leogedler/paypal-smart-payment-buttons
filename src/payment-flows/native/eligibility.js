@@ -189,7 +189,8 @@ export function isNativePaymentEligible({ payment } : IsPaymentEligibleOptions) 
 
 export type NativeOptOutOptions = {|
     type? : string,
-    skip_native_duration? : number
+    skip_native_duration? : number,
+    fallback_reason? : string
 |};
 
 export function getDefaultNativeOptOutOptions() : NativeOptOutOptions {
