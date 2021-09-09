@@ -6,6 +6,7 @@ import { FUNDING, CARD, type FundingEligibilityType } from '@paypal/sdk-constant
 import type { ProxyWindow } from '../types';
 import { getProps, type XProps, type Props } from '../props/props';
 
+import type { CardStyle, CardPlaceholder } from './types';
 import { CARD_FIELD_TYPE } from './constants';
 
 // export something to force webpack to see this as an ES module
@@ -15,10 +16,6 @@ export type PrerenderDetailsType = {|
     win? : ?ProxyWindow,
     fundingSource : $Values<typeof FUNDING>,
     card? : ?$Values<typeof CARD>
-|};
-
-export type CardStyle = {|
-    height? : number
 |};
 
 export type CardExport = ({|
@@ -34,6 +31,7 @@ export type CardXProps = {|
 
     type : $Values<typeof CARD_FIELD_TYPE>,
     style : CardStyle,
+    placeholder : CardPlaceholder,
     cardSessionID : string,
     fundingEligibility : FundingEligibilityType,
     onChange : OnChange,
@@ -50,6 +48,7 @@ export type CardProps = {|
     type : $Values<typeof CARD_FIELD_TYPE>,
     branded : boolean,
     style : CardStyle,
+    placeholder : CardPlaceholder,
     cardSessionID : string,
     fundingEligibility : FundingEligibilityType,
     export : CardExport,
@@ -68,6 +67,7 @@ export function getCardProps({ facilitatorAccessToken } : GetCardPropsOptions) :
         type,
         cardSessionID,
         style,
+        placeholder,
         fundingEligibility,
         onChange,
         branded = fundingEligibility?.card?.branded ?? true,
@@ -82,6 +82,7 @@ export function getCardProps({ facilitatorAccessToken } : GetCardPropsOptions) :
         type,
         branded,
         style,
+        placeholder,
         cardSessionID,
         fundingEligibility,
         onChange,

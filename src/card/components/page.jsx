@@ -19,7 +19,7 @@ type PageProps = {|
 |};
 
 function Page({ cspNonce, props } : PageProps) : mixed {
-    const { facilitatorAccessToken, style, type, onChange, export: xport } = props;
+    const { facilitatorAccessToken, style, placeholder, type, onChange, export: xport } = props;
 
     const [ fieldValue, setFieldValue ] = useState();
     const [ fieldValid, setFieldValid ] = useState(false);
@@ -68,7 +68,7 @@ function Page({ cspNonce, props } : PageProps) : mixed {
                     html, body {
                         margin: 0;
                         padding: 0;
-                        height: ${ style?.height ?? 30 }px;
+                        height: 100%;
                     }
 
                     body {
@@ -89,6 +89,8 @@ function Page({ cspNonce, props } : PageProps) : mixed {
                     ? <CardField
                         cspNonce={ cspNonce }
                         onChange={ onFieldChange }
+                        styleObject={ style }
+                        placeholder={ placeholder }
                     /> : null
             }
 
