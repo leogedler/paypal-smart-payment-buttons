@@ -66,3 +66,10 @@ export type CardPlaceholder = {|
     expiry? : string,
     cvv? : string
 |};
+
+export type CardType = {|
+    gaps : $ReadOnlyArray<number>,
+    lengths : $ReadOnlyArray<number>,
+    type : string,
+    niceType : string
+|};

@@ -3,6 +3,8 @@
 import { camelToDasherize } from 'belter/src';
 import creditCardType, { types } from 'credit-card-type';
 
+import type { CardType } from '../types';
+
 const VALIDATOR_TO_TYPE_MAP = {
     [types.AMERICAN_EXPRESS]: 'AMEX',
     [types.DINERS_CLUB]:      'DINERS',
@@ -16,86 +18,9 @@ const VALIDATOR_TO_TYPE_MAP = {
     [types.UNIONPAY]:         'CHINA_UNION_PAY',
     [types.VISA]:             'VISA',
     'cb-nationale':           'CB_NATIONALE',
-    'cetelem':                  'CETELEM',
-    'cofidis':                  'COFIDIS',
-    'cofinoga':                 'COFINOGA'
-};
-
-
-const splice = (str : string, idx : number, insert : string) : string => str.slice(0, idx) + insert + str.slice(idx);
-
-
-const assertType = (assertion, errorMsg) => {
-    if (!assertion) {
-        throw new TypeError(errorMsg);
-    }
-};
-
-const assertString = (...args) => {
-    assertType(args.every((s) => typeof s === 'string'), 'Expected a string');
-};
-
-/**
- * Detect the card type metadata for a card number
- * @param {string} number Card number
- * @returns {object} Card type metadata object
- */
-const detectCardType = (number) => {
-    const cardType = creditCardType(number)?.[0];
-
-    if (cardType) {
-        return {
-            ...cardType,
-            type: VALIDATOR_TO_TYPE_MAP[cardType.type]
-        };
-    }
-
-    return { gaps: [ 4, 8, 12 ] };
-};
-
-/**
- * Mask a card number for display given a card type. If a card type is
- * not provided, attempt to detect it and mask based on that type.
- * @param {string} cardNumber Card number
- * @returns {string} Masked card number
- */
-export function maskCard(number : string, cardType? : {| |}) : string {
-    assertString(number);
-    number = number.trim().replace(/[^0-9]/g, '').replace(/\s/g, '');
-    // $FlowFixMe
-    const gaps = cardType?.gaps || detectCardType(number)?.gaps;
-
-    if (gaps) {
-        for (let idx = 0; idx < gaps.length; idx++) {
-            const splicePoint = gaps[idx] + idx;
-            if (splicePoint > number.length - 1) {
-                // We're beyond the end of the number
-                break;
-            }
-
-            number = splice(number, splicePoint, ' ');
-        }
-    }
-    return number;
-}
-
-export const maskExpiry = (date : string) : string => {
-    assertString(date);
-    date = date.trim().replace(/\s/g, '').replace(/\//g, '');
-    const gaps = [ 2 ];
-
-    if (gaps) {
-        for (let idx = 0; idx < gaps.length; idx++) {
-            const splicePoint = gaps[idx] + idx;
-            if (splicePoint > date.length - 1) {
-                // We're beyond the end of the date
-                break;
-            }
-
-            date = splice(date, splicePoint, '/');
-        }
-    }
-    return date;
+    'cetelem':                'CETELEM',
+    'cofidis':                'COFIDIS',
+    'cofinoga':               'COFINOGA'
 };
 
 export const defaultInputStyle = {
@@ -127,6 +52,80 @@ export const defaultPlaceholders = {
     cvv:    'CVV'
 };
 
+export const defaultCardType : CardType = { gaps: [ 4, 8, 12 ], lengths: [ 16 ], type: 'Visa', niceType: 'Visa' };
+
+export const splice = (str : string, idx : number, insert : string) : string => str.slice(0, idx) + insert + str.slice(idx);
+
+
+export function assertType(assertion : () => void, errorMsg : string) : mixed {
+    if (!assertion) {
+        throw new TypeError(errorMsg);
+    }
+}
+
+export function assertString<T>(...args : T) : mixed {
+    // $FlowFixMe
+    assertType(args.every((s) => typeof s === 'string'), 'Expected a string');
+}
+
+// Detect the card type metadata for a card number
+export function detectCardType(number : string) : CardType {
+    const cardType = creditCardType(number)?.[0];
+
+    if (cardType) {
+        return {
+            ...cardType,
+            type: VALIDATOR_TO_TYPE_MAP[cardType.type]
+        };
+    }
+
+    return defaultCardType;
+}
+
+// Mask a card number for display given a card type. If a card type is
+// not provided, attempt to detect it and mask based on that type.
+export function maskCard(number : string, cardType? : CardType) : string {
+    assertString(number);
+    number = number.trim().replace(/[^0-9]/g, '').replace(/\s/g, '');
+    // $FlowFixMe
+    const gaps = cardType?.gaps || detectCardType(number)?.gaps;
+
+    if (gaps) {
+        for (let idx = 0; idx < gaps.length; idx++) {
+            const splicePoint = gaps[idx] + idx;
+            if (splicePoint > number.length - 1) {
+                // We're beyond the end of the number
+                break;
+            }
+
+            number = splice(number, splicePoint, ' ');
+        }
+    }
+    return number;
+}
+
+
+// Mask a expity date
+export function maskExpiry(date : string) : string {
+    assertString(date);
+    date = date.trim().replace(/\s/g, '').replace(/\//g, '');
+    const gaps = [ 2 ];
+
+    if (gaps) {
+        for (let idx = 0; idx < gaps.length; idx++) {
+            const splicePoint = gaps[idx] + idx;
+            if (splicePoint > date.length - 1) {
+                // We're beyond the end of the date
+                break;
+            }
+
+            date = splice(date, splicePoint, '/');
+        }
+    }
+    return date;
+}
+
+
 // eslint-disable-next-line flowtype/require-exact-type
 export function styleToString(style : {  }) : string {
     return Object.keys(style).reduce((acc : string, key : string) => (
@@ -145,9 +144,9 @@ export function getStyles(style : {| |}) : [mixed, mixed] {
     }, [ {}, {} ]);
 }
 
-export function checkCardNumber(value : string) : boolean {
+export function checkCardNumber(value : string, maxlength : number) : boolean {
     const trimmedValue = value.replace(/\s/g, '');
-    if (trimmedValue.length <= 16) {
+    if (trimmedValue.length <= maxlength) {
         return true;
     }
     return false;
@@ -167,11 +166,11 @@ export function checkExpiry(value : string) : boolean {
     return false;
 }
 
-export const isNumberKey = (event : Event) => {
+export function isNumberKey(event : Event) : mixed {
     const allowedKeys = [ 'Tab', 'Backspace', 'Shift', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown' ];
     const digitRegex = /[^0-9]/;
     // $FlowFixMe
     if (digitRegex.test(event.key) && !allowedKeys.includes(event.key)) {
         event.preventDefault();
     }
-};
+}

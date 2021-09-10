@@ -15,9 +15,11 @@ import {
     checkCardNumber,
     checkExpiry,
     checkCVV,
-    isNumberKey
+    isNumberKey,
+    detectCardType,
+    defaultCardType
 } from '../lib';
-import type { CardStyle, Card } from '../types';
+import type { CardStyle, Card, CardType } from '../types';
 
 type CardFieldProps = {|
     cspNonce : string,
@@ -28,9 +30,11 @@ type CardFieldProps = {|
 
 export function CardField({ cspNonce, onChange, styleObject = {}, placeholder = {} } : CardFieldProps) : mixed {
     const [ number, setNumber ] = useState('');
+    const [ maskedNumber, setMaskedNumber ] = useState('');
     const [ cvv, setCVV ] = useState('');
     const [ expiry, setExpiry ] = useState('');
     const [ isValid, setIsValid ] = useState(true);
+    const [ cardType, setCardType ] = useState(defaultCardType);
     const [ cursorStart, setCursorStart ] = useState(0);
     const [ cursorEnd, setCursorEnd ] = useState(0);
     const [ isNumberValid, setIsNumberValid ] = useState(true);
@@ -41,12 +45,13 @@ export function CardField({ cspNonce, onChange, styleObject = {}, placeholder = 
 
     const compousedStyles = { ...defaultStyles,  ...generalStyles };
 
-
     useEffect(() => {
 
         const valid = Boolean(isNumberValid && isCvvValid && isExpiryValid);
+        const { lengths } = (cardType : CardType);
+        const maxLength = Math.max(...lengths);
 
-        setIsNumberValid(checkCardNumber(number));
+        setIsNumberValid(checkCardNumber(number, maxLength));
         setIsExpiryValid(checkExpiry(expiry));
         setIsCvvValid(checkCVV(cvv));
         setIsValid(valid);
@@ -55,11 +60,25 @@ export function CardField({ cspNonce, onChange, styleObject = {}, placeholder = 
         inputRef.current.selectionStart = cursorStart;
         inputRef.current.selectionEnd = cursorEnd;
 
-    }, [ number, cvv, expiry, isNumberValid, isCvvValid, isExpiryValid, isValid, cursorStart, cursorEnd ]);
+    }, [
+        number,
+        maskedNumber,
+        cvv,
+        expiry,
+        isNumberValid,
+        isCvvValid,
+        isExpiryValid,
+        isValid,
+        cursorStart,
+        cursorEnd,
+        cardType.type
+    ]);
 
-    const setValueAndCursor = (event : Event) => {
+    const setValueAndCursor : mixed = (event : Event) : mixed => {
         // $FlowFixMe
         const { value, selectionStart, selectionEnd } = event.target;
+
+        setCardType(detectCardType(value));
         
         let startCursorPosition = selectionStart;
         let endCursorPosition = selectionEnd;
@@ -71,7 +90,22 @@ export function CardField({ cspNonce, onChange, styleObject = {}, placeholder = 
         const maskedValue = maskCard(value);
         setCursorStart(startCursorPosition);
         setCursorEnd(endCursorPosition);
-        setNumber(maskedValue);
+        setNumber(value.replace(/\s/g, ''));
+        setMaskedNumber(maskedValue);
+    };
+
+    const onBlur : mixed = () : mixed => {
+
+        const { lengths } = (cardType : CardType);
+        const minLength = Math.min(...lengths);
+        const maxLength = Math.max(...lengths);
+
+        setNumber(number);
+        const trimmedValue = maskedNumber.replace(/\s/g, '');
+        if (trimmedValue.length >= minLength && trimmedValue.length <= maxLength) {
+            // eslint-disable-next-line unicorn/prefer-string-slice
+            setMaskedNumber(`${ trimmedValue.substring(trimmedValue.length - 4) }`);
+        }
     };
 
     return (
@@ -85,11 +119,13 @@ export function CardField({ cspNonce, onChange, styleObject = {}, placeholder = 
                 type='text'
                 className={ isNumberValid ? 'number valid' : 'number invalid' }
                 placeholder={ placeholder.number ?? defaultPlaceholders.number }
-                value={ number }
+                value={ maskedNumber }
                 style={ inputStyles }
                 maxLength='20'
                 onKeyDown={ isNumberKey }
                 onKeyUp={ setValueAndCursor }
+                onFocus={ () => setMaskedNumber(maskCard(number)) }
+                onBlur={ onBlur }
             />
 
             <input
