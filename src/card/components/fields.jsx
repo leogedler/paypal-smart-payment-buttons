@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from 'preact/hooks';
 
 import {
     maskCard,
-    maskExpiry,
+    maskDate,
     defaultStyles,
     defaultInputStyle,
     getStyles,
@@ -15,20 +15,24 @@ import {
     checkCardNumber,
     checkExpiry,
     checkCVV,
-    isNumberKey,
     detectCardType,
-    defaultCardType
+    defaultCardType,
+    setErrors,
+    removeNonDigits,
+    removeSpaces,
+    checkForNonDigits
 } from '../lib';
-import type { CardStyle, Card, CardType } from '../types';
+import type { CardStyle, Card } from '../types';
 
 type CardFieldProps = {|
     cspNonce : string,
-    onChange : ({| value : Card, valid : boolean |}) => void,
+    onChange : ({| value : Card, valid : boolean, errors : $ReadOnlyArray<string> |}) => void,
     styleObject : CardStyle,
     placeholder : {| number? : string, expiry? : string, cvv? : string  |}
 |};
 
 export function CardField({ cspNonce, onChange, styleObject = {}, placeholder = {} } : CardFieldProps) : mixed {
+    const [ keyStroke, setKeyStroke ] = useState(0);
     const [ number, setNumber ] = useState('');
     const [ maskedNumber, setMaskedNumber ] = useState('');
     const [ cvv, setCVV ] = useState('');
@@ -47,65 +51,82 @@ export function CardField({ cspNonce, onChange, styleObject = {}, placeholder = 
 
     useEffect(() => {
 
-        const valid = Boolean(isNumberValid && isCvvValid && isExpiryValid);
-        const { lengths } = (cardType : CardType);
-        const maxLength = Math.max(...lengths);
+        const valid = Boolean(isNumberValid.isValid && isCvvValid && isExpiryValid);
 
-        setIsNumberValid(checkCardNumber(number, maxLength));
+        setIsNumberValid(checkCardNumber(number, cardType));
         setIsExpiryValid(checkExpiry(expiry));
         setIsCvvValid(checkCVV(cvv));
         setIsValid(valid);
-        onChange({ value: { number, cvv, expiry }, valid });
 
-        inputRef.current.selectionStart = cursorStart;
-        inputRef.current.selectionEnd = cursorEnd;
+        const errors = setErrors({ isNumberValid: isNumberValid.isValid, isCvvValid, isExpiryValid });
+        onChange({ value: { number, cvv, expiry }, valid, errors });
 
     }, [
         number,
         maskedNumber,
         cvv,
         expiry,
-        isNumberValid,
         isCvvValid,
         isExpiryValid,
         isValid,
         cursorStart,
         cursorEnd,
-        cardType.type
+        JSON.stringify(isNumberValid),
+        JSON.stringify(cardType),
+        keyStroke
     ]);
 
     const setValueAndCursor : mixed = (event : Event) : mixed => {
         // $FlowFixMe
-        const { value, selectionStart, selectionEnd } = event.target;
+        const { value: rawValue, selectionStart, selectionEnd } = event.target;
 
-        setCardType(detectCardType(value));
-        
         let startCursorPosition = selectionStart;
         let endCursorPosition = selectionEnd;
-        if (value.length === startCursorPosition) {
+        
+        if (checkForNonDigits(rawValue)) {
+            startCursorPosition = cursorStart;
+            endCursorPosition = cursorEnd;
+        }
+        
+        const value = removeNonDigits(rawValue);
+        const maskedValue = maskCard(value);
+
+        setCardType(detectCardType(value));
+
+        if (maskedValue.length !== maskedNumber.length && maskedValue.length === selectionStart + 1) {
             startCursorPosition += 1;
             endCursorPosition += 1;
         }
 
-        const maskedValue = maskCard(value);
+        const element = event.target;
+        window.requestAnimationFrame(() => {
+            // $FlowFixMe
+            element.selectionStart = startCursorPosition;
+            // $FlowFixMe
+            element.selectionEnd = startCursorPosition;
+        });
+
         setCursorStart(startCursorPosition);
         setCursorEnd(endCursorPosition);
-        setNumber(value.replace(/\s/g, ''));
+        setNumber(removeSpaces(value));
         setMaskedNumber(maskedValue);
+        setKeyStroke(keyStroke + 1);
     };
 
     const onBlur : mixed = () : mixed => {
-
-        const { lengths } = (cardType : CardType);
-        const minLength = Math.min(...lengths);
-        const maxLength = Math.max(...lengths);
-
         setNumber(number);
-        const trimmedValue = maskedNumber.replace(/\s/g, '');
-        if (trimmedValue.length >= minLength && trimmedValue.length <= maxLength) {
+        const trimmedValue = removeSpaces(maskedNumber);
+        if (isNumberValid.isValid) {
             // eslint-disable-next-line unicorn/prefer-string-slice
             setMaskedNumber(`${ trimmedValue.substring(trimmedValue.length - 4) }`);
         }
+    };
+
+    const setDateMask : mixed = (event : Event) : mixed => {
+        // $FlowFixMe
+        const { value } = event.target;
+        const mask = maskDate(value);
+        setExpiry(mask);
     };
 
     return (
@@ -117,13 +138,12 @@ export function CardField({ cspNonce, onChange, styleObject = {}, placeholder = 
             <input
                 ref={ inputRef }
                 type='text'
-                className={ isNumberValid ? 'number valid' : 'number invalid' }
+                className={ isNumberValid.isPossibleValid ? 'number valid' : 'number invalid' }
                 placeholder={ placeholder.number ?? defaultPlaceholders.number }
                 value={ maskedNumber }
                 style={ inputStyles }
-                maxLength='20'
-                onKeyDown={ isNumberKey }
-                onKeyUp={ setValueAndCursor }
+                maxLength='24'
+                onInput={ setValueAndCursor }
                 onFocus={ () => setMaskedNumber(maskCard(number)) }
                 onBlur={ onBlur }
             />
@@ -132,11 +152,10 @@ export function CardField({ cspNonce, onChange, styleObject = {}, placeholder = 
                 type='text'
                 className={ isExpiryValid ? 'expiry valid' : 'expiry invalid' }
                 placeholder={ placeholder.expiry ?? defaultPlaceholders.expiry }
-                value={ maskExpiry(expiry) }
+                value={ expiry }
                 style={ inputStyles }
                 maxLength='7'
-                onKeyDown={ isNumberKey }
-                onKeyUp={ event => setExpiry(event.target.value) }
+                onInput={ setDateMask }
             />
 
             <input
@@ -146,8 +165,7 @@ export function CardField({ cspNonce, onChange, styleObject = {}, placeholder = 
                 value={ cvv }
                 style={ inputStyles }
                 maxLength='3'
-                onKeyDown={ isNumberKey }
-                onKeyUp={ event => setCVV(event.target.value) }
+                onInput={ event => setCVV(event.target.value) }
             />
         </Fragment>
     );
@@ -205,8 +223,8 @@ export function CardNumberField({ cspNonce, onChange, styleObject = {}, placehol
                 placeholder={ placeholder.number ?? defaultPlaceholders.number }
                 value={ maskCard(number) }
                 style={ inputStyles }
-                onKeyDown={ isNumberKey }
-                onKeyUp={ setValueAndCursor }
+                maxLength='24'
+                onInput={ setValueAndCursor }
             />
         </Fragment>
     );
@@ -245,8 +263,7 @@ export function CardCVVField({ cspNonce, onChange, styleObject = {}, placeholder
                 placeholder={ placeholder.cvv ?? defaultPlaceholders.cvv }
                 value={ cvv }
                 style={ inputStyles }
-                onKeyDown={ isNumberKey }
-                onKeyUp={ event => setCvv(event.target.value) }
+                onInput={ event => setCvv(event.target.value) }
             />
         </Fragment>
     );
@@ -283,10 +300,9 @@ export function CardExpiryField({ cspNonce, onChange, styleObject = {}, placehol
                 type='text'
                 className={ isExpiryValid ? 'expiry valid' : 'expiry invalid' }
                 placeholder={ placeholder.expiry ?? defaultPlaceholders.expiry }
-                value={ maskExpiry(expiry) }
+                value={ maskDate(expiry) }
                 style={ inputStyles }
-                onKeyDown={ isNumberKey }
-                onKeyUp={ event => setExpiry(event.target.value) }
+                onInput={ event => setExpiry(event.target.value) }
             />
         </Fragment>
     );

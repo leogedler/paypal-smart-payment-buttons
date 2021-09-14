@@ -21,8 +21,10 @@ type PageProps = {|
 function Page({ cspNonce, props } : PageProps) : mixed {
     const { facilitatorAccessToken, style, placeholder, type, onChange, export: xport } = props;
 
+
     const [ fieldValue, setFieldValue ] = useState();
     const [ fieldValid, setFieldValid ] = useState(false);
+    const [ fieldErrors, setFieldErrors ] = useState([]);
 
     const getFieldValue = () => {
         return fieldValue;
@@ -34,9 +36,10 @@ function Page({ cspNonce, props } : PageProps) : mixed {
 
     useEffect(() => {
         onChange({
-            valid: fieldValid
+            valid:    fieldValid,
+            errors: fieldErrors
         });
-    }, [ fieldValid ]);
+    }, [ fieldValid, JSON.stringify(fieldErrors) ]);
 
     useEffect(() => {
         setupExports({
@@ -50,11 +53,12 @@ function Page({ cspNonce, props } : PageProps) : mixed {
                 return submitCardFields({ facilitatorAccessToken });
             }
         });
-    }, [ getFieldValue ]);
+    }, [ fieldValid, JSON.stringify(fieldValue) ]);
 
-    const onFieldChange = ({ value, valid }) => {
+    const onFieldChange = ({ value, valid, errors }) => {
         setFieldValue(value);
         setFieldValid(valid);
+        setFieldErrors(errors);
     };
 
     return (

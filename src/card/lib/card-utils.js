@@ -2,6 +2,7 @@
 
 import { camelToDasherize } from 'belter/src';
 import creditCardType, { types } from 'credit-card-type';
+import luhn10 from 'card-validator/src/luhn-10';
 
 import type { CardType } from '../types';
 
@@ -52,7 +53,7 @@ export const defaultPlaceholders = {
     cvv:    'CVV'
 };
 
-export const defaultCardType : CardType = { gaps: [ 4, 8, 12 ], lengths: [ 16 ], type: 'Visa', niceType: 'Visa' };
+export const defaultCardType : CardType = { gaps: [ 4, 8, 12 ], lengths: [ 16 ], type: 'Unknow', niceType: 'Unknow' };
 
 export const splice = (str : string, idx : number, insert : string) : string => str.slice(0, idx) + insert + str.slice(idx);
 
@@ -105,24 +106,37 @@ export function maskCard(number : string, cardType? : CardType) : string {
 }
 
 
-// Mask a expity date
-export function maskExpiry(date : string) : string {
+// Mask date
+export function maskDate(date : string) : string {
     assertString(date);
-    date = date.trim().replace(/\s/g, '').replace(/\//g, '');
-    const gaps = [ 2 ];
 
-    if (gaps) {
-        for (let idx = 0; idx < gaps.length; idx++) {
-            const splicePoint = gaps[idx] + idx;
-            if (splicePoint > date.length - 1) {
-                // We're beyond the end of the date
-                break;
-            }
-
-            date = splice(date, splicePoint, '/');
-        }
+    if (date.trim().slice(-1) === '/') {
+        // eslint-disable-next-line unicorn/prefer-string-slice
+        return date.substring(0, 2);
     }
-    return date;
+
+    date = date.trim().replace(/\s|\//g, '');
+    
+    if (date.length < 2) {
+        const first = date[0];
+        if (parseInt(first, 10) > 1) {
+            return `0${ first } / `;
+        }
+        return date;
+    }
+
+    // eslint-disable-next-line unicorn/prefer-string-slice
+    const month = date.substring(0, 2);
+    if (parseInt(month, 10) > 12) {
+        const first = month[0];
+        const second = month[1];
+        return `0${ first } / ${ second }`;
+    }
+
+    // eslint-disable-next-line unicorn/prefer-string-slice
+    const year = date.substring(2, 4);
+    return `${ month } / ${ year }`;
+
 }
 
 
@@ -144,12 +158,32 @@ export function getStyles(style : {| |}) : [mixed, mixed] {
     }, [ {}, {} ]);
 }
 
-export function checkCardNumber(value : string, maxlength : number) : boolean {
+export function removeNonDigits(value : string) : string {
     const trimmedValue = value.replace(/\s/g, '');
-    if (trimmedValue.length <= maxlength) {
-        return true;
-    }
-    return false;
+    return trimmedValue.replace(/\D/g, '');
+}
+
+export function removeSpaces(value : string) : string {
+    return value.replace(/\s/g, '');
+}
+
+export function checkForNonDigits(value : string) : boolean {
+    return (/\D/g).test(removeSpaces(value));
+}
+
+export function checkCardNumber(value : string, cardType : CardType) : {| isValid : boolean, isPossibleValid : boolean |} {
+    const trimmedValue = removeSpaces(value);
+    const { lengths } = cardType;
+
+    const validLength = lengths.some((length) => length === trimmedValue.length);
+    const validLuhn = luhn10(trimmedValue);
+
+    const maxLength = Math.max.apply(null, lengths);
+
+    return {
+        isValid:         validLength && validLuhn,
+        isPossibleValid: validLength || trimmedValue.length < maxLength
+    };
 }
 
 export function checkCVV(value : string) : boolean {
@@ -160,17 +194,26 @@ export function checkCVV(value : string) : boolean {
 }
 
 export function checkExpiry(value : string) : boolean {
-    if (value.replace(/\//g, '').length === 4) {
+    if (value.replace(/\s|\//g, '').length === 4) {
         return true;
     }
     return false;
 }
 
-export function isNumberKey(event : Event) : mixed {
-    const allowedKeys = [ 'Tab', 'Backspace', 'Shift', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown' ];
-    const digitRegex = /[^0-9]/;
-    // $FlowFixMe
-    if (digitRegex.test(event.key) && !allowedKeys.includes(event.key)) {
-        event.preventDefault();
+export function setErrors({ isNumberValid, isCvvValid, isExpiryValid } : {| isNumberValid : boolean, isCvvValid : boolean, isExpiryValid : boolean |}) : $ReadOnlyArray<string> {
+    const errors = [];
+
+    if (!isNumberValid) {
+        errors.push('Invalid card number');
     }
+
+    if (!isCvvValid) {
+        errors.push('Invalid CVV');
+    }
+
+    if (!isExpiryValid) {
+        errors.push('Invalid expiration date');
+    }
+    
+    return errors;
 }
