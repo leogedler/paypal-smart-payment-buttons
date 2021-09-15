@@ -2,7 +2,7 @@
 /** @jsx h */
 
 import { h, Fragment } from 'preact';
-import { useState, useEffect, useRef } from 'preact/hooks';
+import { useState, useEffect } from 'preact/hooks';
 
 import {
     maskCard,
@@ -12,17 +12,13 @@ import {
     getStyles,
     styleToString,
     defaultPlaceholders,
-    checkCardNumber,
     checkExpiry,
     checkCVV,
-    detectCardType,
-    defaultCardType,
-    setErrors,
-    removeNonDigits,
-    removeSpaces,
-    checkForNonDigits
+    setErrors
 } from '../lib';
 import type { CardStyle, Card } from '../types';
+
+import { CardNumber } from './CardNumber';
 
 type CardFieldProps = {|
     cspNonce : string,
@@ -32,20 +28,15 @@ type CardFieldProps = {|
 |};
 
 export function CardField({ cspNonce, onChange, styleObject = {}, placeholder = {} } : CardFieldProps) : mixed {
-    const [ keyStroke, setKeyStroke ] = useState(0);
     const [ number, setNumber ] = useState('');
     const [ maskedNumber, setMaskedNumber ] = useState('');
     const [ cvv, setCVV ] = useState('');
     const [ expiry, setExpiry ] = useState('');
     const [ isValid, setIsValid ] = useState(true);
-    const [ cardType, setCardType ] = useState(defaultCardType);
-    const [ cursorStart, setCursorStart ] = useState(0);
-    const [ cursorEnd, setCursorEnd ] = useState(0);
     const [ isNumberValid, setIsNumberValid ] = useState(true);
     const [ isExpiryValid, setIsExpiryValid ] = useState(true);
     const [ isCvvValid, setIsCvvValid ] = useState(true);
     const [ generalStyles, inputStyles ] = getStyles(styleObject);
-    const inputRef = useRef();
 
     const compousedStyles = { ...defaultStyles,  ...generalStyles };
 
@@ -53,7 +44,6 @@ export function CardField({ cspNonce, onChange, styleObject = {}, placeholder = 
 
         const valid = Boolean(isNumberValid.isValid && isCvvValid && isExpiryValid);
 
-        setIsNumberValid(checkCardNumber(number, cardType));
         setIsExpiryValid(checkExpiry(expiry));
         setIsCvvValid(checkCVV(cvv));
         setIsValid(valid);
@@ -69,58 +59,8 @@ export function CardField({ cspNonce, onChange, styleObject = {}, placeholder = 
         isCvvValid,
         isExpiryValid,
         isValid,
-        cursorStart,
-        cursorEnd,
-        JSON.stringify(isNumberValid),
-        JSON.stringify(cardType),
-        keyStroke
+        JSON.stringify(isNumberValid)
     ]);
-
-    const setValueAndCursor : mixed = (event : Event) : mixed => {
-        // $FlowFixMe
-        const { value: rawValue, selectionStart, selectionEnd } = event.target;
-
-        let startCursorPosition = selectionStart;
-        let endCursorPosition = selectionEnd;
-        
-        if (checkForNonDigits(rawValue)) {
-            startCursorPosition = cursorStart;
-            endCursorPosition = cursorEnd;
-        }
-        
-        const value = removeNonDigits(rawValue);
-        const maskedValue = maskCard(value);
-
-        setCardType(detectCardType(value));
-
-        if (maskedValue.length !== maskedNumber.length && maskedValue.length === selectionStart + 1) {
-            startCursorPosition += 1;
-            endCursorPosition += 1;
-        }
-
-        const element = event.target;
-        window.requestAnimationFrame(() => {
-            // $FlowFixMe
-            element.selectionStart = startCursorPosition;
-            // $FlowFixMe
-            element.selectionEnd = startCursorPosition;
-        });
-
-        setCursorStart(startCursorPosition);
-        setCursorEnd(endCursorPosition);
-        setNumber(removeSpaces(value));
-        setMaskedNumber(maskedValue);
-        setKeyStroke(keyStroke + 1);
-    };
-
-    const onBlur : mixed = () : mixed => {
-        setNumber(number);
-        const trimmedValue = removeSpaces(maskedNumber);
-        if (isNumberValid.isValid) {
-            // eslint-disable-next-line unicorn/prefer-string-slice
-            setMaskedNumber(`${ trimmedValue.substring(trimmedValue.length - 4) }`);
-        }
-    };
 
     const setDateMask : mixed = (event : Event) : mixed => {
         // $FlowFixMe
@@ -135,18 +75,23 @@ export function CardField({ cspNonce, onChange, styleObject = {}, placeholder = 
                 {styleToString(compousedStyles)}
             </style>
 
-            <input
-                ref={ inputRef }
+            <CardNumber
                 type='text'
+                // eslint-disable-next-line react/forbid-component-props
                 className={ isNumberValid.isPossibleValid ? 'number valid' : 'number invalid' }
                 placeholder={ placeholder.number ?? defaultPlaceholders.number }
-                value={ maskedNumber }
+                // eslint-disable-next-line react/forbid-component-props
                 style={ inputStyles }
                 maxLength='24'
-                onInput={ setValueAndCursor }
-                onFocus={ () => setMaskedNumber(maskCard(number)) }
-                onBlur={ onBlur }
+                onInput={ ({ cardNumber, cardMaskedNumber }) => {
+                    setNumber(cardNumber);
+                    setMaskedNumber(cardMaskedNumber);
+                } }
+                onValidityChange={ (numberValidity) => {
+                    setIsNumberValid(numberValidity);
+                } }
             />
+
 
             <input
                 type='text'
