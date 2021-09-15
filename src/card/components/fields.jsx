@@ -12,13 +12,13 @@ import {
     getStyles,
     styleToString,
     defaultPlaceholders,
-    checkExpiry,
     checkCVV,
     setErrors
 } from '../lib';
 import type { CardStyle, Card } from '../types';
 
 import { CardNumber } from './CardNumber';
+import { CardExpiry } from './CardExpiry';
 
 type CardFieldProps = {|
     cspNonce : string,
@@ -29,7 +29,6 @@ type CardFieldProps = {|
 
 export function CardField({ cspNonce, onChange, styleObject = {}, placeholder = {} } : CardFieldProps) : mixed {
     const [ number, setNumber ] = useState('');
-    const [ maskedNumber, setMaskedNumber ] = useState('');
     const [ cvv, setCVV ] = useState('');
     const [ expiry, setExpiry ] = useState('');
     const [ isValid, setIsValid ] = useState(true);
@@ -44,7 +43,6 @@ export function CardField({ cspNonce, onChange, styleObject = {}, placeholder = 
 
         const valid = Boolean(isNumberValid.isValid && isCvvValid && isExpiryValid);
 
-        setIsExpiryValid(checkExpiry(expiry));
         setIsCvvValid(checkCVV(cvv));
         setIsValid(valid);
 
@@ -53,7 +51,6 @@ export function CardField({ cspNonce, onChange, styleObject = {}, placeholder = 
 
     }, [
         number,
-        maskedNumber,
         cvv,
         expiry,
         isCvvValid,
@@ -61,13 +58,6 @@ export function CardField({ cspNonce, onChange, styleObject = {}, placeholder = 
         isValid,
         JSON.stringify(isNumberValid)
     ]);
-
-    const setDateMask : mixed = (event : Event) : mixed => {
-        // $FlowFixMe
-        const { value } = event.target;
-        const mask = maskDate(value);
-        setExpiry(mask);
-    };
 
     return (
         <Fragment>
@@ -79,29 +69,26 @@ export function CardField({ cspNonce, onChange, styleObject = {}, placeholder = 
                 type='text'
                 // eslint-disable-next-line react/forbid-component-props
                 className={ isNumberValid.isPossibleValid ? 'number valid' : 'number invalid' }
-                placeholder={ placeholder.number ?? defaultPlaceholders.number }
                 // eslint-disable-next-line react/forbid-component-props
                 style={ inputStyles }
+                placeholder={ placeholder.number ?? defaultPlaceholders.number }
                 maxLength='24'
-                onInput={ ({ cardNumber, cardMaskedNumber }) => {
-                    setNumber(cardNumber);
-                    setMaskedNumber(cardMaskedNumber);
-                } }
-                onValidityChange={ (numberValidity) => {
-                    setIsNumberValid(numberValidity);
-                } }
+                onChange={ ({ cardNumber }) => setNumber(cardNumber) }
+                onValidityChange={ (numberValidity) => setIsNumberValid(numberValidity) }
             />
 
-
-            <input
+            <CardExpiry
                 type='text'
+                // eslint-disable-next-line react/forbid-component-props
                 className={ isExpiryValid ? 'expiry valid' : 'expiry invalid' }
-                placeholder={ placeholder.expiry ?? defaultPlaceholders.expiry }
-                value={ expiry }
+                // eslint-disable-next-line react/forbid-component-props
                 style={ inputStyles }
+                placeholder={ placeholder.expiry ?? defaultPlaceholders.expiry }
                 maxLength='7'
-                onInput={ setDateMask }
+                onChange={ ({ maskedDate }) => setExpiry(maskedDate) }
+                onValidityChange={ (expiryValidity) => setIsExpiryValid(expiryValidity) }
             />
+
 
             <input
                 type='text'

@@ -15,20 +15,20 @@ import {
 } from '../lib';
 import type { CardType } from '../types';
 
-export type CardNumberProps = {|
+type CardNumberProps = {|
     ref? : () => void,
     type : string,
     className : string,
     placeholder : mixed,
     style : mixed,
     maxLength : string,
-    onInput : (numberEvent : {| event : Event, cardNumber : string, cardMaskedNumber : string, cardType : CardType|}) => void,
+    onChange : (numberEvent : {| event : Event, cardNumber : string, cardMaskedNumber : string, cardType : CardType|}) => void,
     onFocus? : (event : Event) => void,
     onBlur? : (event : Event) => void,
     onValidityChange? : (numberValidity : {| isValid : boolean, isPossibleValid : boolean |}) => void
 |};
 
-export function CardNumber({ ref, type, className, placeholder, style, maxLength, onInput, onFocus, onBlur, onValidityChange } : CardNumberProps) : mixed {
+export function CardNumber({ ref, type, className, placeholder, style, maxLength, onChange, onFocus, onBlur, onValidityChange } : CardNumberProps) : mixed {
 
     const [ keyStroke, setKeyStroke ] = useState(0);
     const [ maskedNumber, setMaskedNumber ] = useState('');
@@ -83,7 +83,7 @@ export function CardNumber({ ref, type, className, placeholder, style, maxLength
         setMaskedNumber(maskedValue);
         setKeyStroke(keyStroke + 1);
 
-        onInput({ event, cardNumber: number, cardMaskedNumber: maskedNumber, cardType });
+        onChange({ event, cardNumber: number, cardMaskedNumber: maskedNumber, cardType });
     };
 
     const onBlurEvent : mixed = (event : Event) : mixed => {
