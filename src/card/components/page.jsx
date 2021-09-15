@@ -103,6 +103,8 @@ function Page({ cspNonce, props } : PageProps) : mixed {
                     ? <CardNumberField
                         cspNonce={ cspNonce }
                         onChange={ onFieldChange }
+                        styleObject={ style }
+                        placeholder={ placeholder }
                     /> : null
             }
 
@@ -111,6 +113,8 @@ function Page({ cspNonce, props } : PageProps) : mixed {
                     ? <CardCVVField
                         cspNonce={ cspNonce }
                         onChange={ onFieldChange }
+                        styleObject={ style }
+                        placeholder={ placeholder }
                     /> : null
             }
 
@@ -119,6 +123,8 @@ function Page({ cspNonce, props } : PageProps) : mixed {
                     ? <CardExpiryField
                         cspNonce={ cspNonce }
                         onChange={ onFieldChange }
+                        styleObject={ style }
+                        placeholder={ placeholder }
                     /> : null
             }
         </Fragment>
