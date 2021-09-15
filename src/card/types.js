@@ -70,6 +70,39 @@ export type CardPlaceholder = {|
 export type CardType = {|
     gaps : $ReadOnlyArray<number>,
     lengths : $ReadOnlyArray<number>,
+    patterns : $ReadOnlyArray<number>,
     type : string,
-    niceType : string
+    niceType : string,
+    code : {|
+        name : string,
+        size : number
+     |}
+|};
+
+export type CardNumberChangeEvent = {|
+    event : Event,
+    cardNumber : string,
+    cardMaskedNumber : string,
+    cardType : CardType
+|};
+
+export type CardExpiryChangeEvent = {|
+    event : Event,
+    maskedDate : string,
+    date : string
+|};
+
+export type CardCvvChangeEvent = {|
+    event : Event,
+    cardCvv : string
+|};
+
+export type CardValidity = {|
+    isValid : boolean,
+    isPossibleValid : boolean
+|};
+
+export type CardNavigation = {|
+    next : () => void,
+    previous : () => void
 |};

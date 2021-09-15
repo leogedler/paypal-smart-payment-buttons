@@ -1,10 +1,59 @@
 /* @flow */
 
-import { camelToDasherize } from 'belter/src';
+import { camelToDasherize, noop } from 'belter';
 import creditCardType, { types } from 'credit-card-type';
 import luhn10 from 'card-validator/src/luhn-10';
 
-import type { CardType } from '../types';
+import type { CardType, CardNavigation } from '../types';
+
+// Add additional supported card types
+creditCardType.addCard({
+    code: {
+        name: 'CVV',
+        size: 3
+    },
+    gaps:     [ 4, 8, 12 ],
+    lengths:  [ 16, 18, 19 ],
+    niceType: 'Carte Bancaire',
+    patterns: [],
+    type:     'cb-nationale'
+});
+
+creditCardType.addCard({
+    code: {
+        name: 'CVV',
+        size: 3
+    },
+    gaps:     [ 4, 8, 12, 16 ],
+    lengths:  [ 19 ],
+    niceType: 'Carte Aurore',
+    patterns: [],
+    type:     'cetelem'
+});
+
+creditCardType.addCard({
+    code: {
+        name: '',
+        size: 0
+    },
+    gaps:     [ 4, 8, 12, 16 ],
+    lengths:  [ 17 ],
+    niceType: 'Cofinoga ou Privilège',
+    patterns: [],
+    type:     'cofinoga'
+});
+
+creditCardType.addCard({
+    code: {
+        name: '',
+        size: 0
+    },
+    gaps:     [ 4, 8 ],
+    lengths:  [ 8, 9 ],
+    niceType: '4 étoiles',
+    patterns: [],
+    type:     'cofidis'
+});
 
 const VALIDATOR_TO_TYPE_MAP = {
     [types.AMERICAN_EXPRESS]: 'AMEX',
@@ -22,6 +71,18 @@ const VALIDATOR_TO_TYPE_MAP = {
     'cetelem':                'CETELEM',
     'cofidis':                'COFIDIS',
     'cofinoga':               'COFINOGA'
+};
+
+export const defaultCardType : CardType = {
+    gaps:     [ 4, 8, 12 ],
+    lengths:  [ 16 ],
+    patterns: [],
+    type:     'Unknow',
+    niceType: 'Unknow',
+    code:     {
+        name: 'CVV',
+        size: 3
+    }
 };
 
 export const defaultInputStyle = {
@@ -53,9 +114,14 @@ export const defaultPlaceholders = {
     cvv:    'CVV'
 };
 
-export const defaultCardType : CardType = { gaps: [ 4, 8, 12 ], lengths: [ 16 ], type: 'Unknow', niceType: 'Unknow' };
+export const defaultNavigation : CardNavigation = {
+    next:     () => noop,
+    previous: () => noop
+};
 
-export const splice = (str : string, idx : number, insert : string) : string => str.slice(0, idx) + insert + str.slice(idx);
+export function splice(str : string, idx : number, insert : string) : string {
+    return str.slice(0, idx) + insert + str.slice(idx);
+}
 
 
 export function assertType(assertion : () => void, errorMsg : string) : mixed {
@@ -105,6 +171,10 @@ export function maskCard(number : string, cardType? : CardType) : string {
     return number;
 }
 
+export function removeDateMask(date : string) : string {
+    return date.trim().replace(/\s|\//g, '');
+}
+
 
 // Mask date
 export function maskDate(date : string) : string {
@@ -115,7 +185,7 @@ export function maskDate(date : string) : string {
         return date.substring(0, 2);
     }
 
-    date = date.trim().replace(/\s|\//g, '');
+    date = removeDateMask(date);
     
     if (date.length < 2) {
         const first = date[0];
@@ -158,13 +228,13 @@ export function getStyles(style : {| |}) : [mixed, mixed] {
     }, [ {}, {} ]);
 }
 
-export function removeNonDigits(value : string) : string {
-    const trimmedValue = value.replace(/\s/g, '');
-    return trimmedValue.replace(/\D/g, '');
-}
-
 export function removeSpaces(value : string) : string {
     return value.replace(/\s/g, '');
+}
+
+export function removeNonDigits(value : string) : string {
+    const trimmedValue = removeSpaces(value);
+    return trimmedValue.replace(/\D/g, '');
 }
 
 export function checkForNonDigits(value : string) : boolean {
@@ -186,8 +256,24 @@ export function checkCardNumber(value : string, cardType : CardType) : {| isVali
     };
 }
 
-export function checkCVV(value : string) : boolean {
-    if (value.length === 3) {
+
+export function getCvvLength(cardType : CardType) : number {
+    const { code } = cardType;
+
+    if (typeof code === 'object') {
+        const { size } = code;
+
+        if (typeof size === 'number') {
+            return size;
+        }
+    }
+
+    return 3;
+}
+
+export function checkCVV(value : string, cardType : CardType) : boolean {
+
+    if (value.length === getCvvLength(cardType)) {
         return true;
     }
     return false;
@@ -216,4 +302,19 @@ export function setErrors({ isNumberValid, isCvvValid, isExpiryValid } : {| isNu
     }
     
     return errors;
+}
+
+export function checkRef(nextRef : mixed) : boolean {
+    // $FlowFixMe
+    return nextRef && nextRef.current && nextRef.current.base && typeof nextRef.current.base.focus === 'function';
+}
+
+export function moveCursor(event : Event, start : number, end : number) : mixed {
+    const element = event.target;
+    window.requestAnimationFrame(() => {
+        // $FlowFixMe
+        element.selectionStart = start;
+        // $FlowFixMe
+        element.selectionEnd = end;
+    });
 }
