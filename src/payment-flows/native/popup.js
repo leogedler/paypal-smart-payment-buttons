@@ -526,3 +526,4 @@ export function initNativePopup({ props, serviceData, config, payment, sessionUI
         }
     };
 }
+
