@@ -97,7 +97,7 @@ export type CardCvvChangeEvent = {|
     cardCvv : string
 |};
 
-export type CardValidity = {|
+export type FieldValidity = {|
     isValid : boolean,
     isPossibleValid : boolean
 |};
@@ -105,4 +105,19 @@ export type CardValidity = {|
 export type CardNavigation = {|
     next : () => void,
     previous : () => void
+|};
+
+export type InputState = {|
+    inputValue : string,
+    maskedInputValue : string,
+    cursorStart : number,
+    cursorEnd : number,
+    keyStrokeCount : number,
+    isPossibleValid : boolean,
+    isValid : boolean
+|};
+
+export type InputOptions = {|
+    inputState : InputState,
+    validationFn : () => mixed
 |};

@@ -4,6 +4,7 @@
 import { h } from 'preact';
 import { useState, useEffect } from 'preact/hooks';
 
+
 import {
     maskCard,
     checkForNonDigits,
@@ -13,9 +14,10 @@ import {
     removeSpaces,
     checkCardNumber,
     moveCursor,
-    defaultNavigation
+    defaultNavigation,
+    initInputState
 } from '../lib';
-import type { CardNumberChangeEvent, CardValidity, CardNavigation } from '../types';
+import type { CardNumberChangeEvent, FieldValidity, CardNavigation, InputState, CardType } from '../types';
 
 type CardNumberProps = {|
     name : string,
@@ -29,30 +31,27 @@ type CardNumberProps = {|
     onChange : (numberEvent : CardNumberChangeEvent) => void,
     onFocus : (event : Event) => void,
     onBlur : (event : Event) => void,
-    onValidityChange? : (numberValidity : CardValidity) => void
+    onValidityChange? : (numberValidity : FieldValidity) => void
 |};
 
 export function CardNumber({ name = 'number', navigation = defaultNavigation, ref, type, className, placeholder, style, maxLength, onChange, onFocus, onBlur, onValidityChange } : CardNumberProps) : mixed {
-    const [ cardType, setCardType ] = useState(defaultCardType);
+    const [ cardType, setCardType ] : [ CardType, (CardType) => mixed ] = useState(defaultCardType);
+    const [ inputState, setInputState ] : [ InputState, (InputState) => mixed ] = useState(initInputState);
 
-    const [ inputState, setInputState ] = useState({ inputValue: '', maskedInputValue: '', cursorStart: 0, cursorEnd: 0, keyStrokeCount: 0 });
-    const [ isNumberValid, setIsNumberValid ] = useState({ isValid: false, isPossibleValid: true });
-
-    const { inputValue, maskedInputValue, cursorStart, cursorEnd, keyStrokeCount } = inputState;
-    const { isValid, isPossibleValid } = isNumberValid;
-
+    const { inputValue, maskedInputValue, cursorStart, cursorEnd, keyStrokeCount, isValid, isPossibleValid } = (inputState : InputState);
 
     useEffect(() => {
-        setIsNumberValid(checkCardNumber(inputValue, cardType));
+        const validity = checkCardNumber(inputValue, cardType);
+        setInputState({ ...inputState, ...validity });
     }, [ inputValue, maskedInputValue ]);
 
 
     useEffect(() => {
         if (typeof onValidityChange === 'function') {
-            onValidityChange(isNumberValid);
+            onValidityChange({ isValid, isPossibleValid });
         }
 
-        if (isValid && maskedInputValue.length === cursorStart) {
+        if (inputValue && isValid && maskedInputValue.length === cursorStart) {
             navigation.next();
         }
 
@@ -83,30 +82,52 @@ export function CardNumber({ name = 'number', navigation = defaultNavigation, re
 
         moveCursor(event, startCursorPosition, endCursorPosition);
 
-        setInputState({ inputValue: value, maskedInputValue: maskedValue, cursorStart: startCursorPosition, cursorEnd: endCursorPosition, keyStrokeCount: keyStrokeCount + 1 });
+        setInputState({
+            ...inputState,
+            inputValue:       value,
+            maskedInputValue: maskedValue,
+            cursorStart:      startCursorPosition,
+            cursorEnd:        endCursorPosition,
+            keyStrokeCount:   keyStrokeCount + 1
+        });
 
         onChange({ event, cardNumber: inputValue, cardMaskedNumber: maskedInputValue, cardType });
     };
 
+    const onFocusEvent : mixed = (event : Event) : mixed => {
+        if (typeof onFocus === 'function') {
+            onFocus(event);
+        }
+
+        const state = { ...inputState, maskedInputValue: maskCard(inputValue) };
+        
+        if (!isValid) {
+            state.isPossibleValid = true;
+        }
+
+        setInputState({ ...state });
+    };
+
     const onBlurEvent : mixed = (event : Event) : mixed => {
         const trimmedValue = removeSpaces(maskedInputValue);
-        if (isNumberValid.isValid) {
+
+        const state = { ...inputState };
+
+        if (isValid) {
             // eslint-disable-next-line unicorn/prefer-string-slice
-            setInputState({ ...inputState, maskedInputValue: `${ trimmedValue.substring(trimmedValue.length - 4) }` });
+            state.maskedInputValue = `${ trimmedValue.substring(trimmedValue.length - 4) }`;
         }
 
         if (typeof onBlur === 'function') {
             onBlur(event);
         }
 
-    };
-
-    const onFocusEvent : mixed = (event : Event) : mixed => {
-        setInputState({ ...inputState, maskedInputValue: maskCard(inputValue) });
-
-        if (typeof onFocus === 'function') {
-            onFocus(event);
+        if (!isValid) {
+            state.isPossibleValid = false;
         }
+
+        setInputState({ ...state });
+
     };
 
     return (

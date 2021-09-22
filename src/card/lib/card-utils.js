@@ -4,7 +4,7 @@ import { camelToDasherize, noop } from 'belter';
 import creditCardType, { types } from 'credit-card-type';
 import luhn10 from 'card-validator/src/luhn-10';
 
-import type { CardType, CardNavigation } from '../types';
+import type { CardType, CardNavigation, InputState, FieldValidity } from '../types';
 
 // Add additional supported card types
 creditCardType.addCard({
@@ -118,6 +118,18 @@ export const defaultNavigation : CardNavigation = {
     next:     () => noop,
     previous: () => noop
 };
+
+export const initInputState : InputState = {
+    inputValue:       '',
+    maskedInputValue: '',
+    cursorStart:      0,
+    cursorEnd:        0,
+    keyStrokeCount:   0,
+    isPossibleValid:  true,
+    isValid:          false
+};
+
+export const initFieldValidity : FieldValidity = { isValid: false, isPossibleValid: true };
 
 export function splice(str : string, idx : number, insert : string) : string {
     return str.slice(0, idx) + insert + str.slice(idx);
@@ -241,6 +253,20 @@ export function checkForNonDigits(value : string) : boolean {
     return (/\D/g).test(removeSpaces(value));
 }
 
+export function getCvvLength(cardType : CardType) : number {
+    const { code } = cardType;
+
+    if (typeof code === 'object') {
+        const { size } = code;
+
+        if (typeof size === 'number') {
+            return size;
+        }
+    }
+
+    return 3;
+}
+
 export function checkCardNumber(value : string, cardType : CardType) : {| isValid : boolean, isPossibleValid : boolean |} {
     const trimmedValue = removeSpaces(value);
     const { lengths } = cardType;
@@ -256,34 +282,26 @@ export function checkCardNumber(value : string, cardType : CardType) : {| isVali
     };
 }
 
-
-export function getCvvLength(cardType : CardType) : number {
-    const { code } = cardType;
-
-    if (typeof code === 'object') {
-        const { size } = code;
-
-        if (typeof size === 'number') {
-            return size;
-        }
-    }
-
-    return 3;
-}
-
-export function checkCVV(value : string, cardType : CardType) : boolean {
-
+export function checkCVV(value : string, cardType : CardType) : {| isValid : boolean, isPossibleValid : boolean |} {
+    let isValid = false;
     if (value.length === getCvvLength(cardType)) {
-        return true;
+        isValid = true;
     }
-    return false;
+    return {
+        isValid,
+        isPossibleValid: true
+    };
 }
 
-export function checkExpiry(value : string) : boolean {
+export function checkExpiry(value : string) : {| isValid : boolean, isPossibleValid : boolean |} {
+    let isValid = false;
     if (value.replace(/\s|\//g, '').length === 4) {
-        return true;
+        isValid = true;
     }
-    return false;
+    return {
+        isValid,
+        isPossibleValid: true
+    };
 }
 
 export function setErrors({ isNumberValid, isCvvValid, isExpiryValid } : {| isNumberValid : boolean, isCvvValid : boolean, isExpiryValid : boolean |}) : $ReadOnlyArray<string> {

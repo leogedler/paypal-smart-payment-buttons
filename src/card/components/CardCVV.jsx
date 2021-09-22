@@ -4,8 +4,8 @@
 import { h } from 'preact';
 import { useState, useEffect } from 'preact/hooks';
 
-import { checkCVV, removeNonDigits, defaultNavigation } from '../lib';
-import type { CardType, CardCvvChangeEvent, CardNavigation } from '../types';
+import { checkCVV, removeNonDigits, defaultNavigation, initInputState } from '../lib';
+import type { CardType, CardCvvChangeEvent, CardNavigation, FieldValidity, InputState } from '../types';
 
 type CardCvvProps = {|
     name : string,
@@ -20,51 +20,66 @@ type CardCvvProps = {|
     onChange : (cvvEvent : CardCvvChangeEvent) => void,
     onFocus : (event : Event) => void,
     onBlur : (event : Event) => void,
-    onValidityChange? : (cvvValidity : boolean) => void
+    onValidityChange? : (numberValidity : FieldValidity) => void
 |};
 
 
 export function CardCVV({ name = 'cvv', navigation = defaultNavigation, ref, type, className, placeholder, style, maxLength, onChange, onFocus, onBlur, onValidityChange, cardType } : CardCvvProps) : mixed {
-    const [ keyStroke, setKeyStroke ] = useState(0);
-    const [ cvv, setCvv ] = useState('');
-    const [ isSwitched, setSwitch ] = useState(false);
-    const [ isCvvValid, setIsCvvValid ] = useState(true);
+    const [ inputState, setInputState ] : [ InputState, (InputState) => mixed ] = useState(initInputState);
+    const { inputValue, keyStrokeCount, isValid, isPossibleValid } = (inputState : InputState);
 
     useEffect(() => {
-        setIsCvvValid(checkCVV(cvv, cardType));
-    }, [ cvv, isCvvValid, keyStroke ]);
+        const validity = checkCVV(inputValue, cardType);
+        setInputState({ ...inputState, ...validity });
+    }, [ inputValue ]);
 
     useEffect(() => {
         if (typeof onValidityChange === 'function') {
-            onValidityChange(isCvvValid);
-            if (cvv && isCvvValid) {
-                // $Flow(InferError)
-                if (!isSwitched) {
-                    navigation.next();
-                    setSwitch(true);
-                }
-            } else {
-                setSwitch(false);
-            }
+            onValidityChange({ isValid, isPossibleValid });
         }
-    }, [ isCvvValid ]);
+        if (inputValue && isValid) {
+            navigation.next();
+        }
+    }, [ isValid, isPossibleValid ]);
 
     const setCvvValue : mixed = (event : Event) : mixed => {
         // $FlowFixMe[prop-missing]
         const { value : rawValue } = event.target;
         const value = removeNonDigits(rawValue);
 
-        setCvv(value);
-        setKeyStroke(keyStroke + 1);
+        setInputState({
+            ...inputState,
+            inputValue:       value,
+            maskedInputValue: value,
+            keyStrokeCount:   keyStrokeCount + 1
+        });
 
         onChange({ event, cardCvv: value  });
     };
 
-    const onKeyUp : mixed = (event : Event) => {
+    const onKeyUpEvent : mixed = (event : Event) => {
         // $FlowFixMe[prop-missing]
         const { target: { selectionStart }, key } = event;
         if (selectionStart === 0 && key === 'Backspace') {
             navigation.previous();
+        }
+    };
+
+    const onFocusEvent : mixed = (event : Event) => {
+        if (typeof onFocus === 'function') {
+            onFocus(event);
+        }
+        if (!isValid) {
+            setInputState({ ...inputState, isPossibleValid: true });
+        }
+    };
+
+    const onBlurEvent : mixed = (event : Event) => {
+        if (typeof onBlur === 'function') {
+            onBlur(event);
+        }
+        if (!isValid) {
+            setInputState({ ...inputState, isPossibleValid: false });
         }
     };
 
@@ -75,13 +90,13 @@ export function CardCVV({ name = 'cvv', navigation = defaultNavigation, ref, typ
             type={ type }
             className={ className }
             placeholder={ placeholder }
-            value={ cvv }
+            value={ inputValue }
             style={ style }
             maxLength={ maxLength }
-            onKeyUp={ onKeyUp }
+            onKeyUp={ onKeyUpEvent }
             onInput={ setCvvValue }
-            onFocus={ onFocus }
-            onBlur={ onBlur }
+            onFocus={ onFocusEvent }
+            onBlur={ onBlurEvent }
         />
     );
 }
