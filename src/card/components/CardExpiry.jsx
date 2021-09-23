@@ -25,7 +25,7 @@ type CardExpiryProps = {|
 
 export function CardExpiry({ name = 'expiry', navigation = defaultNavigation, ref, type, className, placeholder, style, maxLength, onChange, onFocus, onBlur, onValidityChange } : CardExpiryProps) : mixed {
     const [ inputState, setInputState ] : [ InputState, (InputState) => mixed ] = useState(initInputState);
-    const { inputValue, maskedInputValue, keyStrokeCount, isValid, isPossibleValid } = (inputState : InputState);
+    const { inputValue, maskedInputValue, keyStrokeCount, isValid, isPossibleValid } = inputState;
 
 
     useEffect(() => {

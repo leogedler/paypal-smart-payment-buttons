@@ -1,10 +1,11 @@
 /* @flow */
 
 import { camelToDasherize, noop } from 'belter';
-import creditCardType, { types } from 'credit-card-type';
+import creditCardType from 'credit-card-type';
 import luhn10 from 'card-validator/src/luhn-10';
 
-import type { CardType, CardNavigation, InputState, FieldValidity } from '../types';
+import type { CardType, CardNavigation, InputState, FieldValidity, FieldStyle } from '../types';
+import { CARD_ERRORS, FIELD_STYLES, VALIDATOR_TO_TYPE_MAP, DEFAULT_CARD_TYPE } from '../constants';
 
 // Add additional supported card types
 creditCardType.addCard({
@@ -55,65 +56,6 @@ creditCardType.addCard({
     type:     'cofidis'
 });
 
-const VALIDATOR_TO_TYPE_MAP = {
-    [types.AMERICAN_EXPRESS]: 'AMEX',
-    [types.DINERS_CLUB]:      'DINERS',
-    [types.DISCOVER]:         'DISCOVER',
-    [types.ELO]:              'ELO',
-    [types.HIPER]:            'HIPER',
-    [types.HIPERCARD]:        'HIPERCARD',
-    [types.JCB]:              'JCB',
-    [types.MASTERCARD]:       'MASTER_CARD',
-    [types.MAESTRO]:          'MAESTRO',
-    [types.UNIONPAY]:         'CHINA_UNION_PAY',
-    [types.VISA]:             'VISA',
-    'cb-nationale':           'CB_NATIONALE',
-    'cetelem':                'CETELEM',
-    'cofidis':                'COFIDIS',
-    'cofinoga':               'COFINOGA'
-};
-
-export const defaultCardType : CardType = {
-    gaps:     [ 4, 8, 12 ],
-    lengths:  [ 16 ],
-    patterns: [],
-    type:     'Unknow',
-    niceType: 'Unknow',
-    code:     {
-        name: 'CVV',
-        size: 3
-    }
-};
-
-export const defaultInputStyle = {
-    border:     'none',
-    background: 'transparent',
-    height:     '100%',
-    fontFamily: 'monospace',
-    fontSize:   '50vh',
-    display:    'inline-block'
-};
-
-export const defaultStyles = {
-    'input':        defaultInputStyle,
-    'input.number': {
-        width:       '60vw',
-        marginRight: '2vw'
-    },
-    'input.cvv': {
-        width:       '16vw',
-        marginRight: '2vw'
-    },
-    'input.expiry': {
-        width: '20vw'
-    }
-};
-export const defaultPlaceholders = {
-    number: 'Card number',
-    expiry: 'MM/YY',
-    cvv:    'CVV'
-};
-
 export const defaultNavigation : CardNavigation = {
     next:     () => noop,
     previous: () => noop
@@ -158,7 +100,7 @@ export function detectCardType(number : string) : CardType {
         };
     }
 
-    return defaultCardType;
+    return DEFAULT_CARD_TYPE;
 }
 
 // Mask a card number for display given a card type. If a card type is
@@ -222,12 +164,32 @@ export function maskDate(date : string) : string {
 }
 
 
+// $FlowFixMe
+export function filterStyles(rawStyles : {| |} = {}) : FieldStyle {
+    const camelKey = Object.keys(FIELD_STYLES);
+    const dashKey = Object.values(FIELD_STYLES);
+
+    // $FlowFixMe
+    return Object.keys(rawStyles).reduce((acc : {|  |}, key : string) => {
+        if (typeof rawStyles[key] === 'object') {
+            acc[key] = rawStyles[key];
+        } else if (camelKey.includes(key) || dashKey.includes(key)) {
+            acc[key] = rawStyles[key];
+        }
+        return acc;
+    }, { });
+
+}
+
 // eslint-disable-next-line flowtype/require-exact-type
-export function styleToString(style : {  }) : string {
-    return Object.keys(style).reduce((acc : string, key : string) => (
+export function styleToString(style : {  } = { }) : string {
+    // $FlowFixMe
+    const filteredStyles = filterStyles(style);
+    return Object.keys(filteredStyles).reduce((acc : string, key : string) => (
         `${ acc }  ${ camelToDasherize(key) } ${ typeof style[key] === 'object' ? `{ ${ styleToString(style[key]) } }` : `: ${ style[key] } ;` }`
     ), '');
 }
+
 export function getStyles(style : {| |}) : [mixed, mixed] {
     // $FlowFixMe
     return Object.keys(style).reduce((acc : [{| |}, {| |}], key : string) => {
@@ -304,7 +266,7 @@ export function checkExpiry(value : string) : {| isValid : boolean, isPossibleVa
     };
 }
 
-export function setErrors({ isNumberValid, isCvvValid, isExpiryValid } : {| isNumberValid : boolean, isCvvValid : boolean, isExpiryValid : boolean |}) : $ReadOnlyArray<string> {
+export function setErrors({ isNumberValid, isCvvValid, isExpiryValid } : {| isNumberValid : boolean, isCvvValid : boolean, isExpiryValid : boolean |}) : [$Values<typeof CARD_ERRORS>] | [] {
     const errors = [];
 
     if (!isNumberValid) {

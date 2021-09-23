@@ -7,7 +7,7 @@ import type { ProxyWindow } from '../types';
 import { getProps, type XProps, type Props } from '../props/props';
 
 import type { CardStyle, CardPlaceholder } from './types';
-import { CARD_FIELD_TYPE } from './constants';
+import { CARD_FIELD_TYPE, CARD_ERRORS } from './constants';
 
 // export something to force webpack to see this as an ES module
 export const TYPES = true;
@@ -24,7 +24,7 @@ export type CardExport = ({|
 
 export type OnChange = ({|
     valid : boolean,
-    errors : $ReadOnlyArray<string>
+    errors : [$Values<typeof CARD_ERRORS>]
 |}) => ZalgoPromise<void>;
 
 export type CardXProps = {|

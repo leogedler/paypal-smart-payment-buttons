@@ -9,7 +9,6 @@ import {
     maskCard,
     checkForNonDigits,
     removeNonDigits,
-    defaultCardType,
     detectCardType,
     removeSpaces,
     checkCardNumber,
@@ -17,7 +16,14 @@ import {
     defaultNavigation,
     initInputState
 } from '../lib';
-import type { CardNumberChangeEvent, FieldValidity, CardNavigation, InputState, CardType } from '../types';
+import type {
+    CardNumberChangeEvent,
+    FieldValidity,
+    CardNavigation,
+    InputState,
+    CardType
+} from '../types';
+import {  DEFAULT_CARD_TYPE } from '../constants';
 
 type CardNumberProps = {|
     name : string,
@@ -35,10 +41,10 @@ type CardNumberProps = {|
 |};
 
 export function CardNumber({ name = 'number', navigation = defaultNavigation, ref, type, className, placeholder, style, maxLength, onChange, onFocus, onBlur, onValidityChange } : CardNumberProps) : mixed {
-    const [ cardType, setCardType ] : [ CardType, (CardType) => mixed ] = useState(defaultCardType);
+    const [ cardType, setCardType ] : [ CardType, (CardType) => mixed ] = useState(DEFAULT_CARD_TYPE);
     const [ inputState, setInputState ] : [ InputState, (InputState) => mixed ] = useState(initInputState);
 
-    const { inputValue, maskedInputValue, cursorStart, cursorEnd, keyStrokeCount, isValid, isPossibleValid } = (inputState : InputState);
+    const { inputValue, maskedInputValue, cursorStart, cursorEnd, keyStrokeCount, isValid, isPossibleValid } = inputState;
 
     useEffect(() => {
         const validity = checkCardNumber(inputValue, cardType);

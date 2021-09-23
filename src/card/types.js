@@ -12,8 +12,12 @@ export type Card = {|
 |};
 
 export type FieldStyle = {|
-    height? : number,
+    height? : string,
+    width? : string,
     color? : string,
+    border? : string,
+    display? : string,
+    background? : string,
     appearance? : string,
     boxShadow? : string,
     direction? : string,

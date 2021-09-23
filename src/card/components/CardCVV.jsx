@@ -26,7 +26,7 @@ type CardCvvProps = {|
 
 export function CardCVV({ name = 'cvv', navigation = defaultNavigation, ref, type, className, placeholder, style, maxLength, onChange, onFocus, onBlur, onValidityChange, cardType } : CardCvvProps) : mixed {
     const [ inputState, setInputState ] : [ InputState, (InputState) => mixed ] = useState(initInputState);
-    const { inputValue, keyStrokeCount, isValid, isPossibleValid } = (inputState : InputState);
+    const { inputValue, keyStrokeCount, isValid, isPossibleValid } = inputState;
 
     useEffect(() => {
         const validity = checkCVV(inputValue, cardType);

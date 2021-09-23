@@ -21,7 +21,6 @@ type PageProps = {|
 function Page({ cspNonce, props } : PageProps) : mixed {
     const { facilitatorAccessToken, style, placeholder, type, onChange, export: xport } = props;
 
-
     const [ fieldValue, setFieldValue ] = useState();
     const [ fieldValid, setFieldValid ] = useState(false);
     const [ fieldErrors, setFieldErrors ] = useState([]);
