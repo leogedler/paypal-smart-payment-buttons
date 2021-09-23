@@ -5,7 +5,7 @@ import { h } from 'preact';
 import { useState, useEffect } from 'preact/hooks';
 
 import { checkCVV, removeNonDigits, defaultNavigation, initInputState } from '../lib';
-import type { CardType, CardCvvChangeEvent, CardNavigation, FieldValidity, InputState } from '../types';
+import type { CardType, CardCvvChangeEvent, CardNavigation, FieldValidity, InputState, InputEvent } from '../types';
 
 type CardCvvProps = {|
     name : string,
@@ -18,13 +18,14 @@ type CardCvvProps = {|
     cardType : CardType,
     navigation : CardNavigation,
     onChange : (cvvEvent : CardCvvChangeEvent) => void,
-    onFocus : (event : Event) => void,
-    onBlur : (event : Event) => void,
+    onFocus : (event : InputEvent) => void,
+    onBlur : (event : InputEvent) => void,
+    allowNaviation : boolean,
     onValidityChange? : (numberValidity : FieldValidity) => void
 |};
 
 
-export function CardCVV({ name = 'cvv', navigation = defaultNavigation, ref, type, className, placeholder, style, maxLength, onChange, onFocus, onBlur, onValidityChange, cardType } : CardCvvProps) : mixed {
+export function CardCVV({ name = 'cvv', navigation = defaultNavigation, ref, type, className, placeholder, style, maxLength, onChange, onFocus, onBlur, onValidityChange, cardType, allowNaviation = false } : CardCvvProps) : mixed {
     const [ inputState, setInputState ] : [ InputState, (InputState) => mixed ] = useState(initInputState);
     const { inputValue, keyStrokeCount, isValid, isPossibleValid } = inputState;
 
@@ -37,13 +38,12 @@ export function CardCVV({ name = 'cvv', navigation = defaultNavigation, ref, typ
         if (typeof onValidityChange === 'function') {
             onValidityChange({ isValid, isPossibleValid });
         }
-        if (inputValue && isValid) {
+        if (allowNaviation && inputValue && isValid) {
             navigation.next();
         }
     }, [ isValid, isPossibleValid ]);
 
-    const setCvvValue : mixed = (event : Event) : mixed => {
-        // $FlowFixMe[prop-missing]
+    const setCvvValue : mixed = (event : InputEvent) : mixed => {
         const { value : rawValue } = event.target;
         const value = removeNonDigits(rawValue);
 
@@ -57,15 +57,20 @@ export function CardCVV({ name = 'cvv', navigation = defaultNavigation, ref, typ
         onChange({ event, cardCvv: value  });
     };
 
-    const onKeyUpEvent : mixed = (event : Event) => {
-        // $FlowFixMe[prop-missing]
-        const { target: { selectionStart }, key } = event;
-        if (selectionStart === 0 && key === 'Backspace') {
-            navigation.previous();
+    const onKeyUpEvent : mixed = (event : InputEvent) => {
+        const { target: { value, selectionStart }, key } = event;
+
+        if (allowNaviation) {
+            if (selectionStart === 0 && [ 'Backspace', 'ArrowLeft' ].includes(key)) {
+                navigation.previous();
+            }
+            if (selectionStart === value.length && [ 'ArrowRight' ].includes(key)) {
+                navigation.next();
+            }
         }
     };
 
-    const onFocusEvent : mixed = (event : Event) => {
+    const onFocusEvent : mixed = (event : InputEvent) => {
         if (typeof onFocus === 'function') {
             onFocus(event);
         }
@@ -74,7 +79,7 @@ export function CardCVV({ name = 'cvv', navigation = defaultNavigation, ref, typ
         }
     };
 
-    const onBlurEvent : mixed = (event : Event) => {
+    const onBlurEvent : mixed = (event : InputEvent) => {
         if (typeof onBlur === 'function') {
             onBlur(event);
         }

@@ -21,7 +21,8 @@ import type {
     FieldValidity,
     CardNavigation,
     InputState,
-    CardType
+    CardType,
+    InputEvent
 } from '../types';
 import {  DEFAULT_CARD_TYPE } from '../constants';
 
@@ -34,13 +35,14 @@ type CardNumberProps = {|
     style : mixed,
     maxLength : string,
     navigation : CardNavigation,
+    allowNaviation : boolean,
     onChange : (numberEvent : CardNumberChangeEvent) => void,
-    onFocus : (event : Event) => void,
-    onBlur : (event : Event) => void,
+    onFocus : (event : InputEvent) => void,
+    onBlur : (event : InputEvent) => void,
     onValidityChange? : (numberValidity : FieldValidity) => void
 |};
 
-export function CardNumber({ name = 'number', navigation = defaultNavigation, ref, type, className, placeholder, style, maxLength, onChange, onFocus, onBlur, onValidityChange } : CardNumberProps) : mixed {
+export function CardNumber({ name = 'number', navigation = defaultNavigation, ref, type, className, placeholder, style, maxLength, onChange, onFocus, onBlur, onValidityChange, allowNaviation = false } : CardNumberProps) : mixed {
     const [ cardType, setCardType ] : [ CardType, (CardType) => mixed ] = useState(DEFAULT_CARD_TYPE);
     const [ inputState, setInputState ] : [ InputState, (InputState) => mixed ] = useState(initInputState);
 
@@ -57,15 +59,14 @@ export function CardNumber({ name = 'number', navigation = defaultNavigation, re
             onValidityChange({ isValid, isPossibleValid });
         }
 
-        if (inputValue && isValid && maskedInputValue.length === cursorStart) {
+        if (allowNaviation && inputValue && isValid && maskedInputValue.length === cursorStart) {
             navigation.next();
         }
 
     }, [ isValid, isPossibleValid ]);
 
 
-    const setValueAndCursor : mixed = (event : Event) : mixed => {
-        // $FlowFixMe
+    const setValueAndCursor : mixed = (event : InputEvent) : mixed => {
         const { value: rawValue, selectionStart, selectionEnd } = event.target;
 
         let startCursorPosition = selectionStart;
@@ -100,7 +101,7 @@ export function CardNumber({ name = 'number', navigation = defaultNavigation, re
         onChange({ event, cardNumber: inputValue, cardMaskedNumber: maskedInputValue, cardType });
     };
 
-    const onFocusEvent : mixed = (event : Event) : mixed => {
+    const onFocusEvent : mixed = (event : InputEvent) : mixed => {
         if (typeof onFocus === 'function') {
             onFocus(event);
         }
@@ -114,7 +115,7 @@ export function CardNumber({ name = 'number', navigation = defaultNavigation, re
         setInputState({ ...state });
     };
 
-    const onBlurEvent : mixed = (event : Event) : mixed => {
+    const onBlurEvent : mixed = (event : InputEvent) : mixed => {
         const trimmedValue = removeSpaces(maskedInputValue);
 
         const state = { ...inputState };
@@ -136,6 +137,21 @@ export function CardNumber({ name = 'number', navigation = defaultNavigation, re
 
     };
 
+    const onKeyUpEvent : mixed = (event : InputEvent) => {
+        const { target: { value, selectionStart }, key } = event;
+
+        if (allowNaviation) {
+            if (selectionStart === 0 && [ 'Backspace', 'ArrowLeft' ].includes(key)) {
+                navigation.previous();
+            }
+
+            if (selectionStart === value.length && [ 'ArrowRight' ].includes(key)) {
+                navigation.next();
+            }
+        }
+
+    };
+
     return (
         <input
             name={ name }
@@ -149,6 +165,7 @@ export function CardNumber({ name = 'number', navigation = defaultNavigation, re
             onInput={ setValueAndCursor }
             onFocus={ onFocusEvent }
             onBlur={ onBlurEvent }
+            onKeyUp={ onKeyUpEvent }
         />
     );
 }

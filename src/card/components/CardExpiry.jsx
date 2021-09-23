@@ -5,7 +5,7 @@ import { h } from 'preact';
 import { useState, useEffect } from 'preact/hooks';
 
 import { maskDate, checkExpiry, removeNonDigits, removeDateMask, defaultNavigation, initInputState } from '../lib';
-import type { CardExpiryChangeEvent, CardNavigation, FieldValidity, InputState } from '../types';
+import type { CardExpiryChangeEvent, CardNavigation, FieldValidity, InputState, InputEvent } from '../types';
 
 type CardExpiryProps = {|
     name : string,
@@ -16,14 +16,15 @@ type CardExpiryProps = {|
     style : mixed,
     maxLength : string,
     navigation : CardNavigation,
+    allowNaviation : boolean,
     onChange : (expiryEvent : CardExpiryChangeEvent) => void,
-    onFocus? : (event : Event) => void,
-    onBlur? : (event : Event) => void,
+    onFocus? : (event : InputEvent) => void,
+    onBlur? : (event : InputEvent) => void,
     onValidityChange? : (numberValidity : FieldValidity) => void
 |};
 
 
-export function CardExpiry({ name = 'expiry', navigation = defaultNavigation, ref, type, className, placeholder, style, maxLength, onChange, onFocus, onBlur, onValidityChange } : CardExpiryProps) : mixed {
+export function CardExpiry({ name = 'expiry', navigation = defaultNavigation, ref, type, className, placeholder, style, maxLength, onChange, onFocus, onBlur, onValidityChange, allowNaviation = false } : CardExpiryProps) : mixed {
     const [ inputState, setInputState ] : [ InputState, (InputState) => mixed ] = useState(initInputState);
     const { inputValue, maskedInputValue, keyStrokeCount, isValid, isPossibleValid } = inputState;
 
@@ -38,13 +39,12 @@ export function CardExpiry({ name = 'expiry', navigation = defaultNavigation, re
             onValidityChange({ isValid, isPossibleValid });
         }
 
-        if (maskedInputValue && isValid) {
+        if (allowNaviation && maskedInputValue && isValid) {
             navigation.next();
         }
     }, [ isValid, isPossibleValid ]);
 
-    const setDateMask : mixed = (event : Event) : mixed => {
-        // $FlowFixMe
+    const setDateMask : mixed = (event : InputEvent) : mixed => {
         const { value : rawValue } = event.target;
         const value = removeNonDigits(rawValue);
         const mask = maskDate(value);
@@ -60,9 +60,8 @@ export function CardExpiry({ name = 'expiry', navigation = defaultNavigation, re
 
     };
 
-    const onKeyUp : mixed = (event : Event) => {
-        // $FlowFixMe
-        const { target: { value }, key } = event;
+    const onKeyUpEvent : mixed = (event : InputEvent) => {
+        const { target: { value, selectionStart }, key } = event;
 
         const last = value.trim().slice(-1);
         if (last === '/' && key === 'Backspace') {
@@ -70,12 +69,18 @@ export function CardExpiry({ name = 'expiry', navigation = defaultNavigation, re
             setInputState({ ...inputState, inputValue: value, maskedInputValue: month });
         }
 
-        if (value === '' && key === 'Backspace') {
-            navigation.previous();
+        if (allowNaviation) {
+            if (selectionStart === 0 && [ 'Backspace', 'ArrowLeft' ].includes(key)) {
+                navigation.previous();
+            }
+
+            if (selectionStart === value.length && [ 'ArrowRight' ].includes(key)) {
+                navigation.next();
+            }
         }
     };
 
-    const onFocusEvent : mixed = (event : Event) => {
+    const onFocusEvent : mixed = (event : InputEvent) => {
         if (typeof onFocus === 'function') {
             onFocus(event);
         }
@@ -84,7 +89,7 @@ export function CardExpiry({ name = 'expiry', navigation = defaultNavigation, re
         }
     };
 
-    const onBlurEvent : mixed = (event : Event) => {
+    const onBlurEvent : mixed = (event : InputEvent) => {
         if (typeof onBlur === 'function') {
             onBlur(event);
         }
@@ -103,7 +108,7 @@ export function CardExpiry({ name = 'expiry', navigation = defaultNavigation, re
             value={ maskedInputValue }
             style={ style }
             maxLength={ maxLength }
-            onKeyUp={ onKeyUp }
+            onKeyUp={ onKeyUpEvent }
             onInput={ setDateMask }
             onFocus={ onFocusEvent }
             onBlur={ onBlurEvent }

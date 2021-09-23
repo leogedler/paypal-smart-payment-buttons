@@ -4,7 +4,7 @@ import { camelToDasherize, noop } from 'belter';
 import creditCardType from 'credit-card-type';
 import luhn10 from 'card-validator/src/luhn-10';
 
-import type { CardType, CardNavigation, InputState, FieldValidity, FieldStyle } from '../types';
+import type { CardType, CardNavigation, InputState, FieldValidity, FieldStyle, InputEvent } from '../types';
 import { CARD_ERRORS, FIELD_STYLES, VALIDATOR_TO_TYPE_MAP, DEFAULT_CARD_TYPE } from '../constants';
 
 // Add additional supported card types
@@ -284,17 +284,31 @@ export function setErrors({ isNumberValid, isCvvValid, isExpiryValid } : {| isNu
     return errors;
 }
 
-export function checkRef(nextRef : mixed) : boolean {
-    // $FlowFixMe
-    return nextRef && nextRef.current && nextRef.current.base && typeof nextRef.current.base.focus === 'function';
-}
-
-export function moveCursor(event : Event, start : number, end : number) : mixed {
+export function moveCursor(event : InputEvent, start : number, end : number) : mixed {
     const element = event.target;
     window.requestAnimationFrame(() => {
-        // $FlowFixMe
         element.selectionStart = start;
-        // $FlowFixMe
         element.selectionEnd = end;
     });
+}
+
+
+export function goToNextField(ref : {| current : {| base : HTMLInputElement |} |}) : () => void {
+    return () => {
+        ref.current.base.selectionStart = 0;
+        ref.current.base.selectionEnd = 0;
+        ref.current.base.focus();
+    };
+}
+
+export function goToPreviousField(ref : {| current : {| base : HTMLInputElement |} |}) : () => void {
+    return () => {
+        const { value } = ref.current.base;
+
+        if (value) {
+            ref.current.base.selectionStart = value.length;
+            ref.current.base.selectionEnd = value.length;
+        }
+        ref.current.base.focus();
+    };
 }
