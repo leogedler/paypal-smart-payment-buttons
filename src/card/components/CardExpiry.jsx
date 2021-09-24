@@ -16,7 +16,7 @@ type CardExpiryProps = {|
     style : mixed,
     maxLength : string,
     navigation : CardNavigation,
-    allowNaviation : boolean,
+    allowNavigation : boolean,
     onChange : (expiryEvent : CardExpiryChangeEvent) => void,
     onFocus? : (event : InputEvent) => void,
     onBlur? : (event : InputEvent) => void,
@@ -24,7 +24,7 @@ type CardExpiryProps = {|
 |};
 
 
-export function CardExpiry({ name = 'expiry', navigation = defaultNavigation, ref, type, className, placeholder, style, maxLength, onChange, onFocus, onBlur, onValidityChange, allowNaviation = false } : CardExpiryProps) : mixed {
+export function CardExpiry({ name = 'expiry', navigation = defaultNavigation, ref, type, className, placeholder, style, maxLength, onChange, onFocus, onBlur, onValidityChange, allowNavigation = false } : CardExpiryProps) : mixed {
     const [ inputState, setInputState ] : [ InputState, (InputState) => mixed ] = useState(initInputState);
     const { inputValue, maskedInputValue, keyStrokeCount, isValid, isPossibleValid } = inputState;
 
@@ -39,7 +39,7 @@ export function CardExpiry({ name = 'expiry', navigation = defaultNavigation, re
             onValidityChange({ isValid, isPossibleValid });
         }
 
-        if (allowNaviation && maskedInputValue && isValid) {
+        if (allowNavigation && maskedInputValue && isValid) {
             navigation.next();
         }
     }, [ isValid, isPossibleValid ]);
@@ -69,7 +69,7 @@ export function CardExpiry({ name = 'expiry', navigation = defaultNavigation, re
             setInputState({ ...inputState, inputValue: value, maskedInputValue: month });
         }
 
-        if (allowNaviation) {
+        if (allowNavigation) {
             if (selectionStart === 0 && [ 'Backspace', 'ArrowLeft' ].includes(key)) {
                 navigation.previous();
             }

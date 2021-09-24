@@ -35,14 +35,14 @@ type CardNumberProps = {|
     style : mixed,
     maxLength : string,
     navigation : CardNavigation,
-    allowNaviation : boolean,
+    allowNavigation : boolean,
     onChange : (numberEvent : CardNumberChangeEvent) => void,
     onFocus : (event : InputEvent) => void,
     onBlur : (event : InputEvent) => void,
     onValidityChange? : (numberValidity : FieldValidity) => void
 |};
 
-export function CardNumber({ name = 'number', navigation = defaultNavigation, ref, type, className, placeholder, style, maxLength, onChange, onFocus, onBlur, onValidityChange, allowNaviation = false } : CardNumberProps) : mixed {
+export function CardNumber({ name = 'number', navigation = defaultNavigation, ref, type, className, placeholder, style, maxLength, onChange, onFocus, onBlur, onValidityChange, allowNavigation = false } : CardNumberProps) : mixed {
     const [ cardType, setCardType ] : [ CardType, (CardType) => mixed ] = useState(DEFAULT_CARD_TYPE);
     const [ inputState, setInputState ] : [ InputState, (InputState) => mixed ] = useState(initInputState);
 
@@ -59,7 +59,7 @@ export function CardNumber({ name = 'number', navigation = defaultNavigation, re
             onValidityChange({ isValid, isPossibleValid });
         }
 
-        if (allowNaviation && inputValue && isValid && maskedInputValue.length === cursorStart) {
+        if (allowNavigation && inputValue && isValid && maskedInputValue.length === cursorStart) {
             navigation.next();
         }
 
@@ -140,7 +140,7 @@ export function CardNumber({ name = 'number', navigation = defaultNavigation, re
     const onKeyUpEvent : mixed = (event : InputEvent) => {
         const { target: { value, selectionStart }, key } = event;
 
-        if (allowNaviation) {
+        if (allowNavigation) {
             if (selectionStart === 0 && [ 'Backspace', 'ArrowLeft' ].includes(key)) {
                 navigation.previous();
             }

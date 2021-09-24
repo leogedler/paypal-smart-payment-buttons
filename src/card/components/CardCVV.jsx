@@ -20,12 +20,12 @@ type CardCvvProps = {|
     onChange : (cvvEvent : CardCvvChangeEvent) => void,
     onFocus : (event : InputEvent) => void,
     onBlur : (event : InputEvent) => void,
-    allowNaviation : boolean,
+    allowNavigation : boolean,
     onValidityChange? : (numberValidity : FieldValidity) => void
 |};
 
 
-export function CardCVV({ name = 'cvv', navigation = defaultNavigation, ref, type, className, placeholder, style, maxLength, onChange, onFocus, onBlur, onValidityChange, cardType, allowNaviation = false } : CardCvvProps) : mixed {
+export function CardCVV({ name = 'cvv', navigation = defaultNavigation, ref, type, className, placeholder, style, maxLength, onChange, onFocus, onBlur, onValidityChange, cardType, allowNavigation = false } : CardCvvProps) : mixed {
     const [ inputState, setInputState ] : [ InputState, (InputState) => mixed ] = useState(initInputState);
     const { inputValue, keyStrokeCount, isValid, isPossibleValid } = inputState;
 
@@ -38,7 +38,7 @@ export function CardCVV({ name = 'cvv', navigation = defaultNavigation, ref, typ
         if (typeof onValidityChange === 'function') {
             onValidityChange({ isValid, isPossibleValid });
         }
-        if (allowNaviation && inputValue && isValid) {
+        if (allowNavigation && inputValue && isValid) {
             navigation.next();
         }
     }, [ isValid, isPossibleValid ]);
@@ -60,7 +60,7 @@ export function CardCVV({ name = 'cvv', navigation = defaultNavigation, ref, typ
     const onKeyUpEvent : mixed = (event : InputEvent) => {
         const { target: { value, selectionStart }, key } = event;
 
-        if (allowNaviation) {
+        if (allowNavigation) {
             if (selectionStart === 0 && [ 'Backspace', 'ArrowLeft' ].includes(key)) {
                 navigation.previous();
             }

@@ -103,7 +103,7 @@ export function CardField({ cspNonce, onChange, styleObject = {}, placeholder = 
                 className={ numberValidity.isPossibleValid || numberValidity.isValid ? 'number valid' : 'number invalid' }
                 // eslint-disable-next-line react/forbid-component-props
                 style={ inputStyles }
-                allowNaviation={ true }
+                allowNavigation={ true }
                 placeholder={ placeholder.number ?? DEFAULT_PLACEHOLDERS.number }
                 maxLength='24'
                 onChange={ onChangeNumber }
@@ -118,7 +118,7 @@ export function CardField({ cspNonce, onChange, styleObject = {}, placeholder = 
                 className={ expiryValid.isPossibleValid || expiryValid.isValid ? 'expiry valid' : 'expiry invalid' }
                 // eslint-disable-next-line react/forbid-component-props
                 style={ inputStyles }
-                allowNaviation={ true }
+                allowNavigation={ true }
                 placeholder={ placeholder.expiry ?? DEFAULT_PLACEHOLDERS.expiry }
                 maxLength='7'
                 onChange={ ({ maskedDate } : CardExpiryChangeEvent) => setExpiry(maskedDate) }
@@ -134,7 +134,7 @@ export function CardField({ cspNonce, onChange, styleObject = {}, placeholder = 
                 className={ cvvValid.isPossibleValid || cvvValid.isValid ? 'cvv valid' : 'cvv invalid' }
                 // eslint-disable-next-line react/forbid-component-props
                 style={ inputStyles }
-                allowNaviation={ true }
+                allowNavigation={ true }
                 placeholder={ placeholder.cvv ?? DEFAULT_PLACEHOLDERS.cvv }
                 maxLength={ getCvvLength(cardType) }
                 onChange={ ({ cardCvv } : CardCvvChangeEvent) => setCvv(cardCvv) }
