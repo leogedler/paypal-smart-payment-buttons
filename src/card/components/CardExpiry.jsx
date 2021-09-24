@@ -4,13 +4,14 @@
 import { h } from 'preact';
 import { useState, useEffect } from 'preact/hooks';
 
-import { maskDate, checkExpiry, removeNonDigits, removeDateMask, defaultNavigation, initInputState } from '../lib';
+import { maskDate, checkExpiry, removeNonDigits, removeDateMask, defaultNavigation, defaultInputState, navigateOnKeyDown } from '../lib';
 import type { CardExpiryChangeEvent, CardNavigation, FieldValidity, InputState, InputEvent } from '../types';
 
 type CardExpiryProps = {|
     name : string,
     ref : () => void,
     type : string,
+    state? : InputState,
     className : string,
     placeholder : mixed,
     style : mixed,
@@ -24,8 +25,8 @@ type CardExpiryProps = {|
 |};
 
 
-export function CardExpiry({ name = 'expiry', navigation = defaultNavigation, ref, type, className, placeholder, style, maxLength, onChange, onFocus, onBlur, onValidityChange, allowNavigation = false } : CardExpiryProps) : mixed {
-    const [ inputState, setInputState ] : [ InputState, (InputState) => mixed ] = useState(initInputState);
+export function CardExpiry({ name = 'expiry', navigation = defaultNavigation, state, ref, type, className, placeholder, style, maxLength, onChange, onFocus, onBlur, onValidityChange, allowNavigation = false } : CardExpiryProps) : mixed {
+    const [ inputState, setInputState ] : [ InputState, (InputState) => mixed ] = useState({ ...defaultInputState, ...state });
     const { inputValue, maskedInputValue, keyStrokeCount, isValid, isPossibleValid } = inputState;
 
 
@@ -60,8 +61,8 @@ export function CardExpiry({ name = 'expiry', navigation = defaultNavigation, re
 
     };
 
-    const onKeyUpEvent : mixed = (event : InputEvent) => {
-        const { target: { value, selectionStart }, key } = event;
+    const onKeyDownEvent : mixed = (event : InputEvent) => {
+        const { target: { value }, key } = event;
 
         const last = value.trim().slice(-1);
         if (last === '/' && key === 'Backspace') {
@@ -70,13 +71,7 @@ export function CardExpiry({ name = 'expiry', navigation = defaultNavigation, re
         }
 
         if (allowNavigation) {
-            if (selectionStart === 0 && [ 'Backspace', 'ArrowLeft' ].includes(key)) {
-                navigation.previous();
-            }
-
-            if (selectionStart === value.length && [ 'ArrowRight' ].includes(key)) {
-                navigation.next();
-            }
+            navigateOnKeyDown(event, navigation);
         }
     };
 
@@ -108,7 +103,7 @@ export function CardExpiry({ name = 'expiry', navigation = defaultNavigation, re
             value={ maskedInputValue }
             style={ style }
             maxLength={ maxLength }
-            onKeyUp={ onKeyUpEvent }
+            onKeyDown={ onKeyDownEvent }
             onInput={ setDateMask }
             onFocus={ onFocusEvent }
             onBlur={ onBlurEvent }

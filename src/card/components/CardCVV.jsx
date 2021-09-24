@@ -4,13 +4,14 @@
 import { h } from 'preact';
 import { useState, useEffect } from 'preact/hooks';
 
-import { checkCVV, removeNonDigits, defaultNavigation, initInputState } from '../lib';
+import { checkCVV, removeNonDigits, defaultNavigation, defaultInputState, navigateOnKeyDown } from '../lib';
 import type { CardType, CardCvvChangeEvent, CardNavigation, FieldValidity, InputState, InputEvent } from '../types';
 
 type CardCvvProps = {|
     name : string,
     ref : mixed,
     type : string,
+    state? : InputState,
     className : string,
     placeholder : mixed,
     style : mixed,
@@ -25,8 +26,8 @@ type CardCvvProps = {|
 |};
 
 
-export function CardCVV({ name = 'cvv', navigation = defaultNavigation, ref, type, className, placeholder, style, maxLength, onChange, onFocus, onBlur, onValidityChange, cardType, allowNavigation = false } : CardCvvProps) : mixed {
-    const [ inputState, setInputState ] : [ InputState, (InputState) => mixed ] = useState(initInputState);
+export function CardCVV({ name = 'cvv', navigation = defaultNavigation, state, ref, type, className, placeholder, style, maxLength, onChange, onFocus, onBlur, onValidityChange, cardType, allowNavigation = false } : CardCvvProps) : mixed {
+    const [ inputState, setInputState ] : [ InputState, (InputState) => mixed ] = useState({ ...defaultInputState, ...state });
     const { inputValue, keyStrokeCount, isValid, isPossibleValid } = inputState;
 
     useEffect(() => {
@@ -57,16 +58,9 @@ export function CardCVV({ name = 'cvv', navigation = defaultNavigation, ref, typ
         onChange({ event, cardCvv: value  });
     };
 
-    const onKeyUpEvent : mixed = (event : InputEvent) => {
-        const { target: { value, selectionStart }, key } = event;
-
+    const onKeyDownEvent : mixed = (event : InputEvent) => {
         if (allowNavigation) {
-            if (selectionStart === 0 && [ 'Backspace', 'ArrowLeft' ].includes(key)) {
-                navigation.previous();
-            }
-            if (selectionStart === value.length && [ 'ArrowRight' ].includes(key)) {
-                navigation.next();
-            }
+            navigateOnKeyDown(event, navigation);
         }
     };
 
@@ -98,7 +92,7 @@ export function CardCVV({ name = 'cvv', navigation = defaultNavigation, ref, typ
             value={ inputValue }
             style={ style }
             maxLength={ maxLength }
-            onKeyUp={ onKeyUpEvent }
+            onKeyDown={ onKeyDownEvent }
             onInput={ setCvvValue }
             onFocus={ onFocusEvent }
             onBlur={ onBlurEvent }

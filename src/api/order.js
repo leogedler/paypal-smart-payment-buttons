@@ -848,9 +848,11 @@ type TokenizeCardResult = {|
 |};
 
 export function tokenizeCard({ card } : TokenizeCardOptions) : ZalgoPromise<TokenizeCardResult> {
+    // eslint-disable-next-line no-console
+    console.log('Card data', card);
     return ZalgoPromise.try(() => {
         // eslint-disable-next-line no-console
-        console.warn('Card Tokenize GQL mutation not yet implemented', { card });
+        console.log('Card Tokenize GQL mutation not yet implemented', { card });
         return {
             paymentMethodToken: uniqueID()
         };
@@ -862,15 +864,45 @@ type ApproveCardPaymentOptions = {|
     vault : boolean,
     branded : boolean,
     card : {|
-        number : string,
-        cvv : string,
-        expiry : string
+        cardNumber : string,
+        expirationDate : string,
+        postalCode : string
     |}
 |};
 
-export function approveCardPayment({ card, orderID, vault, branded } : ApproveCardPaymentOptions) : ZalgoPromise<void> {
-    return ZalgoPromise.try(() => {
-        // eslint-disable-next-line no-console
-        console.warn('Card Approve Payment GQL mutation not yet implemented', { card, orderID, vault, branded });
+export function approveCardPayment({ card, orderID, branded } : ApproveCardPaymentOptions) : ZalgoPromise<void> {
+    // eslint-disable-next-line no-console
+    console.log('Card data', card);
+
+
+    return callGraphQL({
+        name:    'ProcessPayment',
+        query: `
+            mutation ProcessPayment(
+                $token: String!
+                $clientId: String!
+                $card: CardInput!
+                $branded: Boolean!
+            ) {
+                processPayment(
+                    clientID: $clientId
+                    paymentMethod: { type: CREDIT_CARD, card: $card }
+                    branded: $branded
+                    token: $token
+                    buttonSessionID: "f7r7367r4"
+                )
+            }
+        `,
+        variables: { token: orderID, clientId: 'alc_client1', card, branded }
+    }).then((gqlResult) => {
+        if (!gqlResult) {
+            throw new Error(`GraphQL GetApplePayPayment returned no applePayment object`);
+        }
+        return gqlResult;
     });
+
+    // return ZalgoPromise.try(() => {
+    //     // eslint-disable-next-line no-console
+    //     console.log('Card Approve Payment GQL mutation not yet implemented', { card, orderID, vault, branded });
+    // });
 }

@@ -14,7 +14,8 @@ import {
     checkCardNumber,
     moveCursor,
     defaultNavigation,
-    initInputState
+    defaultInputState,
+    navigateOnKeyDown
 } from '../lib';
 import type {
     CardNumberChangeEvent,
@@ -30,21 +31,22 @@ type CardNumberProps = {|
     name : string,
     ref : mixed,
     type : string,
+    state? : InputState,
     className : string,
     placeholder : mixed,
     style : mixed,
     maxLength : string,
-    navigation : CardNavigation,
-    allowNavigation : boolean,
+    navigation? : CardNavigation,
+    allowNavigation? : boolean,
     onChange : (numberEvent : CardNumberChangeEvent) => void,
-    onFocus : (event : InputEvent) => void,
-    onBlur : (event : InputEvent) => void,
+    onFocus? : (event : InputEvent) => void,
+    onBlur? : (event : InputEvent) => void,
     onValidityChange? : (numberValidity : FieldValidity) => void
 |};
 
-export function CardNumber({ name = 'number', navigation = defaultNavigation, ref, type, className, placeholder, style, maxLength, onChange, onFocus, onBlur, onValidityChange, allowNavigation = false } : CardNumberProps) : mixed {
+export function CardNumber({ name = 'number', navigation = defaultNavigation, state, ref, type, className, placeholder, style, maxLength, onChange, onFocus, onBlur, onValidityChange, allowNavigation = false } : CardNumberProps) : mixed {
     const [ cardType, setCardType ] : [ CardType, (CardType) => mixed ] = useState(DEFAULT_CARD_TYPE);
-    const [ inputState, setInputState ] : [ InputState, (InputState) => mixed ] = useState(initInputState);
+    const [ inputState, setInputState ] : [ InputState, (InputState) => mixed ] = useState({ ...defaultInputState, ...state });
 
     const { inputValue, maskedInputValue, cursorStart, cursorEnd, keyStrokeCount, isValid, isPossibleValid } = inputState;
 
@@ -68,6 +70,8 @@ export function CardNumber({ name = 'number', navigation = defaultNavigation, re
 
     const setValueAndCursor : mixed = (event : InputEvent) : mixed => {
         const { value: rawValue, selectionStart, selectionEnd } = event.target;
+        const value = removeNonDigits(rawValue);
+        const maskedValue = maskCard(value);
 
         let startCursorPosition = selectionStart;
         let endCursorPosition = selectionEnd;
@@ -77,18 +81,14 @@ export function CardNumber({ name = 'number', navigation = defaultNavigation, re
             endCursorPosition = cursorEnd;
         }
         
-        const value = removeNonDigits(rawValue);
-        const maskedValue = maskCard(value);
-
-        setCardType(detectCardType(value));
-
         if (maskedInputValue.length !== maskedValue.length && maskedValue.length === selectionStart + 1) {
             startCursorPosition += 1;
             endCursorPosition += 1;
         }
 
-        moveCursor(event, startCursorPosition, endCursorPosition);
+        moveCursor(event.target, startCursorPosition, endCursorPosition);
 
+        setCardType(detectCardType(value));
         setInputState({
             ...inputState,
             inputValue:       value,
@@ -106,50 +106,39 @@ export function CardNumber({ name = 'number', navigation = defaultNavigation, re
             onFocus(event);
         }
 
-        const state = { ...inputState, maskedInputValue: maskCard(inputValue) };
+        const newState = { ...inputState, maskedInputValue: maskCard(inputValue) };
         
         if (!isValid) {
-            state.isPossibleValid = true;
+            newState.isPossibleValid = true;
         }
 
-        setInputState({ ...state });
+        setInputState({ ...newState });
     };
 
     const onBlurEvent : mixed = (event : InputEvent) : mixed => {
         const trimmedValue = removeSpaces(maskedInputValue);
 
-        const state = { ...inputState };
+        const newState = { ...inputState };
 
         if (isValid) {
             // eslint-disable-next-line unicorn/prefer-string-slice
-            state.maskedInputValue = `${ trimmedValue.substring(trimmedValue.length - 4) }`;
+            newState.maskedInputValue = `${ trimmedValue.substring(trimmedValue.length - 4) }`;
+        } else {
+            newState.isPossibleValid = false;
         }
 
         if (typeof onBlur === 'function') {
             onBlur(event);
         }
 
-        if (!isValid) {
-            state.isPossibleValid = false;
-        }
-
-        setInputState({ ...state });
+        setInputState({ ...newState });
 
     };
 
-    const onKeyUpEvent : mixed = (event : InputEvent) => {
-        const { target: { value, selectionStart }, key } = event;
-
+    const onKeyDownEvent : mixed = (event : InputEvent) => {
         if (allowNavigation) {
-            if (selectionStart === 0 && [ 'Backspace', 'ArrowLeft' ].includes(key)) {
-                navigation.previous();
-            }
-
-            if (selectionStart === value.length && [ 'ArrowRight' ].includes(key)) {
-                navigation.next();
-            }
+            navigateOnKeyDown(event, navigation);
         }
-
     };
 
     return (
@@ -165,7 +154,7 @@ export function CardNumber({ name = 'number', navigation = defaultNavigation, re
             onInput={ setValueAndCursor }
             onFocus={ onFocusEvent }
             onBlur={ onBlurEvent }
-            onKeyUp={ onKeyUpEvent }
+            onKeyDown={ onKeyDownEvent }
         />
     );
 }

@@ -61,7 +61,7 @@ export const defaultNavigation : CardNavigation = {
     previous: () => noop
 };
 
-export const initInputState : InputState = {
+export const defaultInputState : InputState = {
     inputValue:       '',
     maskedInputValue: '',
     cursorStart:      0,
@@ -284,8 +284,7 @@ export function setErrors({ isNumberValid, isCvvValid, isExpiryValid } : {| isNu
     return errors;
 }
 
-export function moveCursor(event : InputEvent, start : number, end : number) : mixed {
-    const element = event.target;
+export function moveCursor(element : HTMLInputElement, start : number, end : number) : mixed {
     window.requestAnimationFrame(() => {
         element.selectionStart = start;
         element.selectionEnd = end;
@@ -295,8 +294,7 @@ export function moveCursor(event : InputEvent, start : number, end : number) : m
 
 export function goToNextField(ref : {| current : {| base : HTMLInputElement |} |}) : () => void {
     return () => {
-        ref.current.base.selectionStart = 0;
-        ref.current.base.selectionEnd = 0;
+        moveCursor(ref.current.base, 0, 0);
         ref.current.base.focus();
     };
 }
@@ -306,9 +304,20 @@ export function goToPreviousField(ref : {| current : {| base : HTMLInputElement 
         const { value } = ref.current.base;
 
         if (value) {
-            ref.current.base.selectionStart = value.length;
-            ref.current.base.selectionEnd = value.length;
+            const valueLength = value.length;
+            moveCursor(ref.current.base, valueLength, valueLength);
         }
         ref.current.base.focus();
     };
+}
+
+export function navigateOnKeyDown(event : InputEvent, navigation : CardNavigation) : mixed {
+    const { target: { value, selectionStart }, key } = event;
+    if (selectionStart === 0 && [ 'Backspace', 'ArrowLeft' ].includes(key)) {
+        navigation.previous();
+    }
+
+    if (selectionStart === value.length && [ 'ArrowRight' ].includes(key)) {
+        navigation.next();
+    }
 }

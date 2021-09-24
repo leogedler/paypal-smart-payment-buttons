@@ -102,7 +102,18 @@ export function submitCardFields({ facilitatorAccessToken } : SubmitCardFieldsOp
 
         if (intent === INTENT.CAPTURE || intent === INTENT.AUTHORIZE) {
             return createOrder().then(orderID => {
-                return approveCardPayment({ card, orderID, vault, branded });
+                const cardObject = {
+                    cardNumber:     card.number,
+                    expirationDate: card.expiry,
+                    postalCode:     '48007'
+                };
+                return approveCardPayment({ card: cardObject, orderID, vault, branded }).catch((error) => {
+                    // console.log('graphql error --->', error);
+                    // getLogger().info('branded_vault_card_payment_failed');
+                    // $FlowFixMe
+                    // error.code = ERROR_CODE.PAY_WITH_DIFFERENT_CARD;
+                    throw error;
+                });
             }).then(() => {
                 return onApprove({ payerID: uniqueID() }, { restart });
             });
