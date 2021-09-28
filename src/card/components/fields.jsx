@@ -49,8 +49,8 @@ export function CardField({ cspNonce, onChange, styleObject = {}, placeholder = 
     const [ expiry, setExpiry ] = useState('');
     const [ isValid, setIsValid ] = useState(true);
     const [ numberValidity, setNumberValidity ] = useState(initFieldValidity);
-    const [ expiryValid, setExpiryValidity ] = useState(initFieldValidity);
-    const [ cvvValid, setCvvValidity ] = useState(initFieldValidity);
+    const [ expiryValidity, setExpiryValidity ] = useState(initFieldValidity);
+    const [ cvvValidity, setCvvValidity ] = useState(initFieldValidity);
     const [ generalStyles, inputStyles ] = getStyles(styleObject);
     const [ cardType, setCardType ] = useState(DEFAULT_CARD_TYPE);
     const numberRef = useRef();
@@ -66,11 +66,12 @@ export function CardField({ cspNonce, onChange, styleObject = {}, placeholder = 
 
     useEffect(() => {
 
-        const valid = Boolean(numberValidity.isValid && cvvValid.isValid && expiryValid.isValid);
+        const valid = Boolean(numberValidity.isValid && cvvValidity.isValid && expiryValidity.isValid);
 
         setIsValid(valid);
 
-        const errors = setErrors({ isNumberValid: numberValidity.isValid, isCvvValid: cvvValid.isValid, isExpiryValid: expiryValid.isValid });
+        const errors = setErrors({ isNumberValid: numberValidity.isValid, isCvvValid: cvvValidity.isValid, isExpiryValid: expiryValidity.isValid });
+
         onChange({ value: { number, cvv, expiry }, valid, errors });
 
     }, [
@@ -79,8 +80,8 @@ export function CardField({ cspNonce, onChange, styleObject = {}, placeholder = 
         expiry,
         isValid,
         JSON.stringify(numberValidity),
-        JSON.stringify(cvvValid),
-        JSON.stringify(expiryValid),
+        JSON.stringify(cvvValidity),
+        JSON.stringify(expiryValidity),
         JSON.stringify(cardType)
     ]);
 
@@ -115,14 +116,14 @@ export function CardField({ cspNonce, onChange, styleObject = {}, placeholder = 
                 navigation={ cardExpiryNavivation }
                 type='text'
                 // eslint-disable-next-line react/forbid-component-props
-                className={ expiryValid.isPossibleValid || expiryValid.isValid ? 'expiry valid' : 'expiry invalid' }
+                className={ expiryValidity.isPossibleValid || expiryValidity.isValid ? 'expiry valid' : 'expiry invalid' }
                 // eslint-disable-next-line react/forbid-component-props
                 style={ inputStyles }
                 allowNavigation={ true }
                 placeholder={ placeholder.expiry ?? DEFAULT_PLACEHOLDERS.expiry }
                 maxLength='7'
                 onChange={ ({ maskedDate } : CardExpiryChangeEvent) => setExpiry(maskedDate) }
-                onValidityChange={ (expiryValidity : FieldValidity) => setExpiryValidity(expiryValidity) }
+                onValidityChange={ (expiryValidityity : FieldValidity) => setExpiryValidity(expiryValidityity) }
             />
 
             <CardCVV
@@ -131,14 +132,14 @@ export function CardField({ cspNonce, onChange, styleObject = {}, placeholder = 
                 type='text'
                 cardType={ cardType }
                 // eslint-disable-next-line react/forbid-component-props
-                className={ cvvValid.isPossibleValid || cvvValid.isValid ? 'cvv valid' : 'cvv invalid' }
+                className={ cvvValidity.isPossibleValid || cvvValidity.isValid ? 'cvv valid' : 'cvv invalid' }
                 // eslint-disable-next-line react/forbid-component-props
                 style={ inputStyles }
                 allowNavigation={ true }
                 placeholder={ placeholder.cvv ?? DEFAULT_PLACEHOLDERS.cvv }
                 maxLength={ getCvvLength(cardType) }
                 onChange={ ({ cardCvv } : CardCvvChangeEvent) => setCvv(cardCvv) }
-                onValidityChange={ (cvvValidity : FieldValidity) => setCvvValidity(cvvValidity) }
+                onValidityChange={ (cvvValidityity : FieldValidity) => setCvvValidity(cvvValidityity) }
             />
         </Fragment>
     );
@@ -195,7 +196,7 @@ type CardExpiryFieldProps = {|
 
 export function CardExpiryField({ cspNonce, onChange, styleObject = {}, placeholder = {} } : CardExpiryFieldProps) : mixed {
     const [ expiry, setExpiry ] = useState('');
-    const [ expiryValid, setExpiryValidity ] = useState(true);
+    const [ expiryValidity, setExpiryValidity ] = useState(true);
     const [ generalStyles, inputStyles ] = getStyles(styleObject);
 
     const compousedStyles = { ...{ input: DEFAULT_INPUT_STYLE },  ...generalStyles };
@@ -215,13 +216,13 @@ export function CardExpiryField({ cspNonce, onChange, styleObject = {}, placehol
             <CardExpiry
                 type='text'
                 // eslint-disable-next-line react/forbid-component-props
-                className={ expiryValid ? 'expiry valid' : 'expiry invalid' }
+                className={ expiryValidity ? 'expiry valid' : 'expiry invalid' }
                 // eslint-disable-next-line react/forbid-component-props
                 style={ inputStyles }
                 placeholder={ placeholder.expiry ?? DEFAULT_PLACEHOLDERS.expiry }
                 maxLength='7'
                 onChange={ ({ maskedDate } : CardExpiryChangeEvent) => setExpiry(maskedDate) }
-                onValidityChange={ (expiryValidity : boolean) => setExpiryValidity(expiryValidity) }
+                onValidityChange={ (expiryValidityity : boolean) => setExpiryValidity(expiryValidityity) }
             />
         </Fragment>
     );
@@ -235,7 +236,7 @@ type CardCvvFieldProps = {|
 
 export function CardCVVField({ cspNonce, onChange, styleObject = {}, placeholder = {} } : CardCvvFieldProps) : mixed {
     const [ cvv, setCvv ] = useState('');
-    const [ cvvValid, setCvvValidity ] = useState(true);
+    const [ cvvValidity, setCvvValidity ] = useState(true);
     const [ generalStyles, inputStyles ] = getStyles(styleObject);
     
     const compousedStyles = { ...{ input: DEFAULT_INPUT_STYLE },  ...generalStyles };
@@ -255,13 +256,13 @@ export function CardCVVField({ cspNonce, onChange, styleObject = {}, placeholder
             <CardCVV
                 type='text'
                 // eslint-disable-next-line react/forbid-component-props
-                className={ cvvValid ? 'cvv valid' : 'cvv invalid' }
+                className={ cvvValidity ? 'cvv valid' : 'cvv invalid' }
                 // eslint-disable-next-line react/forbid-component-props
                 style={ inputStyles }
                 placeholder={ placeholder.cvv ?? DEFAULT_PLACEHOLDERS.cvv }
                 maxLength='4'
                 onChange={ ({ cardCvv } : CardCvvChangeEvent) => setCvv(cardCvv) }
-                onValidityChange={ (cvvValidity : boolean) => setCvvValidity(cvvValidity) }
+                onValidityChange={ (cvvValidityity : boolean) => setCvvValidity(cvvValidityity) }
             />
         </Fragment>
     );
