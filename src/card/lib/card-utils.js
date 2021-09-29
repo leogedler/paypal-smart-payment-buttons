@@ -89,6 +89,10 @@ export function assertString<T>(...args : T) : mixed {
     assertType(args.every((s) => typeof s === 'string'), 'Expected a string');
 }
 
+export function removeSpaces(value : string) : string {
+    return value.replace(/\s/g, '');
+}
+
 // Detect the card type metadata for a card number
 export function detectCardType(number : string) : CardType {
     const cardType = creditCardType(number)?.[0];
@@ -125,6 +129,12 @@ export function maskCard(number : string, cardType? : CardType) : string {
     return number;
 }
 
+// Return the last 4 digits of a valid card number
+export function maskValidCard(number : string) : string {
+    const trimmedValue = removeSpaces(number);
+    return trimmedValue.slice(-4);
+}
+
 export function removeDateMask(date : string) : string {
     return date.trim().replace(/\s|\//g, '');
 }
@@ -135,8 +145,7 @@ export function maskDate(date : string) : string {
     assertString(date);
 
     if (date.trim().slice(-1) === '/') {
-        // eslint-disable-next-line unicorn/prefer-string-slice
-        return date.substring(0, 2);
+        return date.slice(0, 2);
     }
 
     date = removeDateMask(date);
@@ -149,16 +158,14 @@ export function maskDate(date : string) : string {
         return date;
     }
 
-    // eslint-disable-next-line unicorn/prefer-string-slice
-    const month = date.substring(0, 2);
+    const month = date.slice(0, 2);
     if (parseInt(month, 10) > 12) {
         const first = month[0];
         const second = month[1];
         return `0${ first } / ${ second }`;
     }
 
-    // eslint-disable-next-line unicorn/prefer-string-slice
-    const year = date.substring(2, 4);
+    const year = date.slice(2, 4);
     return `${ month } / ${ year }`;
 
 }
@@ -200,10 +207,6 @@ export function getStyles(style : {| |}) : [mixed, mixed] {
         }
         return acc;
     }, [ {}, {} ]);
-}
-
-export function removeSpaces(value : string) : string {
-    return value.replace(/\s/g, '');
 }
 
 export function removeNonDigits(value : string) : string {
@@ -284,6 +287,7 @@ export function setErrors({ isNumberValid, isCvvValid, isExpiryValid } : {| isNu
     return errors;
 }
 
+// Move cursor within a field
 export function moveCursor(element : HTMLInputElement, start : number, end : number) : mixed {
     window.requestAnimationFrame(() => {
         element.selectionStart = start;
@@ -291,7 +295,7 @@ export function moveCursor(element : HTMLInputElement, start : number, end : num
     });
 }
 
-
+// Navigation helper to go to the next field putting the cursor at the start
 export function goToNextField(ref : {| current : {| base : HTMLInputElement |} |}) : () => void {
     return () => {
         moveCursor(ref.current.base, 0, 0);
@@ -299,6 +303,7 @@ export function goToNextField(ref : {| current : {| base : HTMLInputElement |} |
     };
 }
 
+// Navigation helper to go to the previous field putting the curser at the end
 export function goToPreviousField(ref : {| current : {| base : HTMLInputElement |} |}) : () => void {
     return () => {
         const { value } = ref.current.base;
@@ -311,6 +316,7 @@ export function goToPreviousField(ref : {| current : {| base : HTMLInputElement 
     };
 }
 
+// Navigate between fields using the arrow keys and/or the backspace
 export function navigateOnKeyDown(event : InputEvent, navigation : CardNavigation) : mixed {
     const { target: { value, selectionStart }, key } = event;
     if (selectionStart === 0 && [ 'Backspace', 'ArrowLeft' ].includes(key)) {

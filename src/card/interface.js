@@ -104,11 +104,10 @@ export function submitCardFields({ facilitatorAccessToken } : SubmitCardFieldsOp
             return createOrder().then(orderID => {
                 const cardObject = {
                     cardNumber:     card.number,
-                    expirationDate: card.expiry,
+                    expirationDate: '01/2022',
                     postalCode:     '48007'
                 };
                 return approveCardPayment({ card: cardObject, orderID, vault, branded }).catch((error) => {
-                    // console.log('graphql error --->', error);
                     // getLogger().info('branded_vault_card_payment_failed');
                     // $FlowFixMe
                     // error.code = ERROR_CODE.PAY_WITH_DIFFERENT_CARD;

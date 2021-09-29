@@ -10,12 +10,12 @@ import {
     checkForNonDigits,
     removeNonDigits,
     detectCardType,
-    removeSpaces,
     checkCardNumber,
     moveCursor,
     defaultNavigation,
     defaultInputState,
-    navigateOnKeyDown
+    navigateOnKeyDown,
+    maskValidCard
 } from '../lib';
 import type {
     CardNumberChangeEvent,
@@ -71,6 +71,7 @@ export function CardNumber({ name = 'number', navigation = defaultNavigation, st
     const setValueAndCursor : mixed = (event : InputEvent) : mixed => {
         const { value: rawValue, selectionStart, selectionEnd } = event.target;
         const value = removeNonDigits(rawValue);
+        const detectedCardType = detectCardType(value);
         const maskedValue = maskCard(value);
 
         let startCursorPosition = selectionStart;
@@ -88,7 +89,7 @@ export function CardNumber({ name = 'number', navigation = defaultNavigation, st
 
         moveCursor(event.target, startCursorPosition, endCursorPosition);
 
-        setCardType(detectCardType(value));
+        setCardType(detectedCardType);
         setInputState({
             ...inputState,
             inputValue:       value,
@@ -98,7 +99,7 @@ export function CardNumber({ name = 'number', navigation = defaultNavigation, st
             keyStrokeCount:   keyStrokeCount + 1
         });
 
-        onChange({ event, cardNumber: inputValue, cardMaskedNumber: maskedInputValue, cardType });
+        onChange({ event, cardNumber: value, cardMaskedNumber: maskedValue, cardType: detectedCardType });
     };
 
     const onFocusEvent : mixed = (event : InputEvent) : mixed => {
@@ -106,9 +107,13 @@ export function CardNumber({ name = 'number', navigation = defaultNavigation, st
             onFocus(event);
         }
 
-        const newState = { ...inputState, maskedInputValue: maskCard(inputValue) };
+        const maskedValue = maskCard(inputValue);
+        const newState = { ...inputState, maskedInputValue: maskedValue };
         
-        if (!isValid) {
+        if (isValid) {
+            // Timeout needed to wait for the marked replacement
+            setTimeout(() => moveCursor(event.target, maskedValue.length, maskedValue.length));
+        } else {
             newState.isPossibleValid = true;
         }
 
@@ -116,13 +121,10 @@ export function CardNumber({ name = 'number', navigation = defaultNavigation, st
     };
 
     const onBlurEvent : mixed = (event : InputEvent) : mixed => {
-        const trimmedValue = removeSpaces(maskedInputValue);
-
         const newState = { ...inputState };
 
         if (isValid) {
-            // eslint-disable-next-line unicorn/prefer-string-slice
-            newState.maskedInputValue = `${ trimmedValue.substring(trimmedValue.length - 4) }`;
+            newState.maskedInputValue = maskValidCard(maskedInputValue);
         } else {
             newState.isPossibleValid = false;
         }
