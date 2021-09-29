@@ -874,7 +874,6 @@ export function approveCardPayment({ card, orderID, branded } : ApproveCardPayme
     // eslint-disable-next-line no-console
     console.log('Card data', card);
 
-
     return callGraphQL({
         name:    'ProcessPayment',
         query: `
@@ -896,13 +895,8 @@ export function approveCardPayment({ card, orderID, branded } : ApproveCardPayme
         variables: { token: orderID, clientId: 'alc_client1', card, branded }
     }).then((gqlResult) => {
         if (!gqlResult) {
-            throw new Error(`GraphQL GetApplePayPayment returned no applePayment object`);
+            throw new Error('Error on GraphQL ProcessPayment mutation');
         }
         return gqlResult;
     });
-
-    // return ZalgoPromise.try(() => {
-    //     // eslint-disable-next-line no-console
-    //     console.log('Card Approve Payment GQL mutation not yet implemented', { card, orderID, vault, branded });
-    // });
 }

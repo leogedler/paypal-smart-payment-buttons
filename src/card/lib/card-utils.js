@@ -5,7 +5,7 @@ import creditCardType from 'credit-card-type';
 import luhn10 from 'card-validator/src/luhn-10';
 
 import type { CardType, CardNavigation, InputState, FieldValidity, FieldStyle, InputEvent } from '../types';
-import { CARD_ERRORS, FIELD_STYLES, VALIDATOR_TO_TYPE_MAP, DEFAULT_CARD_TYPE } from '../constants';
+import { CARD_ERRORS, FIELD_STYLE, VALIDATOR_TO_TYPE_MAP, DEFAULT_CARD_TYPE } from '../constants';
 
 // Add additional supported card types
 creditCardType.addCard({
@@ -173,8 +173,8 @@ export function maskDate(date : string) : string {
 
 // $FlowFixMe
 export function filterStyles(rawStyles : {| |} = {}) : FieldStyle {
-    const camelKey = Object.keys(FIELD_STYLES);
-    const dashKey = Object.values(FIELD_STYLES);
+    const camelKey = Object.keys(FIELD_STYLE);
+    const dashKey = Object.values(FIELD_STYLE);
 
     // $FlowFixMe
     return Object.keys(rawStyles).reduce((acc : {|  |}, key : string) => {
@@ -273,15 +273,15 @@ export function setErrors({ isNumberValid, isCvvValid, isExpiryValid } : {| isNu
     const errors = [];
 
     if (!isNumberValid) {
-        errors.push('Invalid card number');
+        errors.push(CARD_ERRORS.INVALID_NUMBER);
     }
 
     if (!isCvvValid) {
-        errors.push('Invalid CVV');
+        errors.push(CARD_ERRORS.INVALID_CVV);
     }
 
     if (!isExpiryValid) {
-        errors.push('Invalid expiration date');
+        errors.push(CARD_ERRORS.INVALID_EXPIRY);
     }
     
     return errors;

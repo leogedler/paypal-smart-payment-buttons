@@ -26,7 +26,25 @@ type CardCvvProps = {|
 |};
 
 
-export function CardCVV({ name = 'cvv', navigation = defaultNavigation, state, ref, type, className, placeholder, style, maxLength, onChange, onFocus, onBlur, onValidityChange, cardType, allowNavigation = false } : CardCvvProps) : mixed {
+export function CardCVV(
+    {
+        name = 'cvv',
+        navigation = defaultNavigation,
+        allowNavigation = false,
+        state,
+        ref,
+        type,
+        className,
+        placeholder,
+        style,
+        maxLength,
+        onChange,
+        onFocus,
+        onBlur,
+        onValidityChange,
+        cardType
+    } : CardCvvProps
+) : mixed {
     const [ inputState, setInputState ] : [ InputState, (InputState) => mixed ] = useState({ ...defaultInputState, ...state });
     const { inputValue, keyStrokeCount, isValid, isPossibleValid } = inputState;
 

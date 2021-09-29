@@ -24,7 +24,7 @@ export type CardExport = ({|
 
 export type OnChange = ({|
     valid : boolean,
-    errors : [$Values<typeof CARD_ERRORS>]
+    errors : [$Values<typeof CARD_ERRORS>] | []
 |}) => ZalgoPromise<void>;
 
 export type CardXProps = {|

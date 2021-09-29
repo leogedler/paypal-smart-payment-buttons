@@ -44,7 +44,24 @@ type CardNumberProps = {|
     onValidityChange? : (numberValidity : FieldValidity) => void
 |};
 
-export function CardNumber({ name = 'number', navigation = defaultNavigation, state, ref, type, className, placeholder, style, maxLength, onChange, onFocus, onBlur, onValidityChange, allowNavigation = false } : CardNumberProps) : mixed {
+export function CardNumber(
+    {
+        name = 'number',
+        navigation = defaultNavigation,
+        allowNavigation = false,
+        state,
+        ref,
+        type,
+        className,
+        placeholder,
+        style,
+        maxLength,
+        onChange,
+        onFocus,
+        onBlur,
+        onValidityChange
+    } : CardNumberProps
+) : mixed {
     const [ cardType, setCardType ] : [ CardType, (CardType) => mixed ] = useState(DEFAULT_CARD_TYPE);
     const [ inputState, setInputState ] : [ InputState, (InputState) => mixed ] = useState({ ...defaultInputState, ...state });
 
@@ -111,7 +128,7 @@ export function CardNumber({ name = 'number', navigation = defaultNavigation, st
         const newState = { ...inputState, maskedInputValue: maskedValue };
         
         if (isValid) {
-            // Timeout needed to wait for the marked replacement
+            // Timeout needed to wait for the 4 digit mask replacement
             setTimeout(() => moveCursor(event.target, maskedValue.length, maskedValue.length));
         } else {
             newState.isPossibleValid = true;

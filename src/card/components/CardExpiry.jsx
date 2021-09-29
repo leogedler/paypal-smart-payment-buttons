@@ -25,7 +25,24 @@ type CardExpiryProps = {|
 |};
 
 
-export function CardExpiry({ name = 'expiry', navigation = defaultNavigation, state, ref, type, className, placeholder, style, maxLength, onChange, onFocus, onBlur, onValidityChange, allowNavigation = false } : CardExpiryProps) : mixed {
+export function CardExpiry(
+    {
+        name = 'expiry',
+        navigation = defaultNavigation,
+        state,
+        ref,
+        type,
+        className,
+        placeholder,
+        style,
+        maxLength,
+        onChange,
+        onFocus,
+        onBlur,
+        onValidityChange,
+        allowNavigation = false
+    } : CardExpiryProps
+) : mixed {
     const [ inputState, setInputState ] : [ InputState, (InputState) => mixed ] = useState({ ...defaultInputState, ...state });
     const { inputValue, maskedInputValue, keyStrokeCount, isValid, isPossibleValid } = inputState;
 

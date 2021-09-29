@@ -14,9 +14,9 @@ export const CARD_FIELD_TYPE = {
 };
 
 export const CARD_ERRORS = {
-    INVALID_NUMBER:  ('Invalid card number' : 'Invalid card number'),
-    INVALIDE_EXPIRY: ('Invalid expiration date' : 'Invalid expiration date'),
-    INVALID_CVV:          ('Invalid CVV' : 'Invalid CVV')
+    INVALID_NUMBER:       ('INVALID_NUMBER' : 'INVALID_NUMBER'),
+    INVALID_EXPIRY:       ('INVALID_EXPIRY' : 'INVALID_EXPIRY'),
+    INVALID_CVV:          ('INVALID_CVV' : 'INVALID_CVV')
 };
 
 export const CARD_FIELD_TYPE_TO_FRAME_NAME : {| [$Values<typeof CARD_FIELD_TYPE>] : $Values<typeof FRAME_NAME> |} = {
@@ -26,7 +26,7 @@ export const CARD_FIELD_TYPE_TO_FRAME_NAME : {| [$Values<typeof CARD_FIELD_TYPE>
     [ CARD_FIELD_TYPE.EXPIRY ]: FRAME_NAME.CARD_EXPIRY_FIELD
 };
 
-export const FIELD_STYLES : FieldStyle = {
+export const FIELD_STYLE : FieldStyle = {
     height:                  'height',
     width:                   'width',
     color:                   'color',
@@ -70,17 +70,7 @@ export const FIELD_STYLES : FieldStyle = {
     paddingLeft:             'padding-left',
     textAlign:               'text-align',
     textShadow:              'text-shadow',
-    transition:              'transition',
-    MozAppearance:           '-moz-appearance',
-    MozBoxShadow:            '-moz-box-shadow',
-    MozOsxFontSmoothing:     '-moz-osx-font-smoothing',
-    MozTapHighlightColor:    '-moz-tap-highlight-color',
-    MozTransition:           '-moz-transition',
-    WebkitAppearance:        '-webkit-appearance',
-    WebkitBoxShadow:         '-webkit-box-shadow',
-    WebkitFontSmoothing:     '-webkit-font-smoothing',
-    WebkitTapHighlightColor: '-webkit-tap-highlight-color',
-    WebkitTransition:        '-webkit-transition'
+    transition:              'transition'
 };
 
 // $FlowFixMe
@@ -123,7 +113,7 @@ export const DEFAULT_INPUT_STYLE : FieldStyle = {
     display:    'inline-block'
 };
 
-export const DEFAULT_STYLES = {
+export const DEFAULT_STYLE = {
     'input':        DEFAULT_INPUT_STYLE,
     'input.number': {
         width:       '60vw',

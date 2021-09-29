@@ -38,7 +38,7 @@ function Page({ cspNonce, props } : PageProps) : mixed {
             valid:    fieldValid,
             errors: fieldErrors
         });
-    }, [ fieldValid, JSON.stringify(fieldErrors) ]);
+    }, [ fieldValid, fieldErrors ]);
 
     useEffect(() => {
         setupExports({
@@ -52,12 +52,12 @@ function Page({ cspNonce, props } : PageProps) : mixed {
                 return submitCardFields({ facilitatorAccessToken });
             }
         });
-    }, [ fieldValid, JSON.stringify(fieldValue) ]);
+    }, [ fieldValid, fieldValue ]);
 
     const onFieldChange = ({ value, valid, errors }) => {
-        setFieldValue(value);
+        setFieldValue({ ...value });
+        setFieldErrors([ ...errors ]);
         setFieldValid(valid);
-        setFieldErrors(errors);
     };
 
     return (
