@@ -327,3 +327,17 @@ export function navigateOnKeyDown(event : InputEvent, navigation : CardNavigatio
         navigation.next();
     }
 }
+
+// Format expity date to MM/YYYY
+export function convertDateFormat(date : string) : string {
+    const trimmedDate = removeSpaces(date);
+    const splittedDate = trimmedDate.split('/');
+    let formattedDate = trimmedDate;
+
+    if (splittedDate[1] && splittedDate[1].length === 2) {
+        splittedDate[1] = `20${ splittedDate[1] }`;
+        formattedDate = splittedDate.join('/');
+    }
+
+    return formattedDate;
+}

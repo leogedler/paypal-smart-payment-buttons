@@ -863,6 +863,7 @@ type ApproveCardPaymentOptions = {|
     orderID : string,
     vault : boolean,
     branded : boolean,
+    clientID : string,
     card : {|
         cardNumber : string,
         expirationDate : string,
@@ -870,29 +871,29 @@ type ApproveCardPaymentOptions = {|
     |}
 |};
 
-export function approveCardPayment({ card, orderID, branded } : ApproveCardPaymentOptions) : ZalgoPromise<void> {
+export function approveCardPayment({ card, orderID, clientID } : ApproveCardPaymentOptions) : ZalgoPromise<void> {
     // eslint-disable-next-line no-console
-    console.log('Card data', card);
+    console.log('Card data', orderID, clientID, card);
 
     return callGraphQL({
         name:    'ProcessPayment',
         query: `
             mutation ProcessPayment(
-                $token: String!
-                $clientId: String!
+                $orderID: String!
+                $clientID: String!
                 $card: CardInput!
                 $branded: Boolean!
             ) {
                 processPayment(
-                    clientID: $clientId
+                    clientID: $clientID
                     paymentMethod: { type: CREDIT_CARD, card: $card }
                     branded: $branded
-                    token: $token
+                    token: $orderID
                     buttonSessionID: "f7r7367r4"
                 )
             }
         `,
-        variables: { token: orderID, clientId: 'alc_client1', card, branded }
+        variables: { orderID, clientID, card, branded: true }
     }).then((gqlResult) => {
         if (!gqlResult) {
             throw new Error('Error on GraphQL ProcessPayment mutation');

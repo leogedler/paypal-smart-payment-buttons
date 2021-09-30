@@ -12,7 +12,8 @@ import {
     getCvvLength,
     initFieldValidity,
     goToNextField,
-    goToPreviousField
+    goToPreviousField,
+    convertDateFormat
 } from '../lib';
 import type {
     CardStyle,
@@ -122,7 +123,7 @@ export function CardField({ cspNonce, onChange, styleObject = {}, placeholder = 
                 allowNavigation={ true }
                 placeholder={ placeholder.expiry ?? DEFAULT_PLACEHOLDERS.expiry }
                 maxLength='7'
-                onChange={ ({ maskedDate } : CardExpiryChangeEvent) => setExpiry(maskedDate) }
+                onChange={ ({ maskedDate } : CardExpiryChangeEvent) => setExpiry(convertDateFormat(maskedDate)) }
                 onValidityChange={ (expiryValidityity : FieldValidity) => setExpiryValidity({ ...expiryValidityity }) }
             />
 

@@ -7,6 +7,7 @@ import { uniqueID } from 'belter/src';
 
 import { FRAME_NAME } from '../constants';
 import { tokenizeCard, approveCardPayment } from '../api';
+import { getLogger } from '../lib';
 
 import { getCardProps } from './props';
 import type { Card } from './types';
@@ -77,7 +78,7 @@ type SubmitCardFieldsOptions = {|
 |};
 
 export function submitCardFields({ facilitatorAccessToken } : SubmitCardFieldsOptions) : ZalgoPromise<void> {
-    const { intent, branded, vault, createOrder, onApprove } = getCardProps({ facilitatorAccessToken });
+    const { intent, branded, vault, createOrder, onApprove, clientID } = getCardProps({ facilitatorAccessToken });
     
     return ZalgoPromise.try(() => {
         if (!hasCardFields()) {
@@ -102,15 +103,15 @@ export function submitCardFields({ facilitatorAccessToken } : SubmitCardFieldsOp
 
         if (intent === INTENT.CAPTURE || intent === INTENT.AUTHORIZE) {
             return createOrder().then(orderID => {
+
                 const cardObject = {
                     cardNumber:     card.number,
-                    expirationDate: '01/2022',
+                    expirationDate: card.expiry,
                     postalCode:     '48007'
                 };
-                return approveCardPayment({ card: cardObject, orderID, vault, branded }).catch((error) => {
-                    // getLogger().info('branded_vault_card_payment_failed');
-                    // $FlowFixMe
-                    // error.code = ERROR_CODE.PAY_WITH_DIFFERENT_CARD;
+
+                return approveCardPayment({ card: cardObject, orderID, vault, branded, clientID }).catch((error) => {
+                    getLogger().info('card_fields_payment_failed');
                     throw error;
                 });
             }).then(() => {
