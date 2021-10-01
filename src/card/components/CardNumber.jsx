@@ -27,6 +27,12 @@ import type {
 } from '../types';
 import {  DEFAULT_CARD_TYPE } from '../constants';
 
+// Helper method to check if navigation to next field should be allowed
+function validateNavigation({ allowNavigation,  inputState } : {| allowNavigation : boolean, inputState : InputState |}) : boolean {
+    const { inputValue, isValid, maskedInputValue, cursorStart, contentPasted } = inputState;
+    return Boolean(allowNavigation && inputValue && isValid && (maskedInputValue.length === cursorStart || contentPasted));
+}
+
 type CardNumberProps = {|
     name : string,
     ref : mixed,
@@ -78,7 +84,7 @@ export function CardNumber(
             onValidityChange({ isValid, isPossibleValid });
         }
 
-        if (allowNavigation && inputValue && isValid && maskedInputValue.length === cursorStart) {
+        if (validateNavigation({ allowNavigation, inputState })) {
             navigation.next();
         }
 
@@ -128,8 +134,8 @@ export function CardNumber(
         const newState = { ...inputState, maskedInputValue: maskedValue };
         
         if (isValid) {
-            // Timeout needed to wait for the 4 digit mask replacement
-            setTimeout(() => moveCursor(event.target, maskedValue.length, maskedValue.length));
+            // Timeout needed to wait for the 4 digit mask replacement when the inout is valid
+            setTimeout(() => moveCursor(event.target, maskedValue.length));
         } else {
             newState.isPossibleValid = true;
         }
@@ -150,7 +156,7 @@ export function CardNumber(
             onBlur(event);
         }
 
-        setInputState({ ...newState });
+        setInputState({ ...newState, contentPasted: false });
 
     };
 
@@ -158,6 +164,11 @@ export function CardNumber(
         if (allowNavigation) {
             navigateOnKeyDown(event, navigation);
         }
+    };
+
+    const onPasteEvent : mixed = () => {
+        const newState = { ...inputState, contentPasted: true };
+        setInputState(newState);
     };
 
     return (
@@ -174,6 +185,7 @@ export function CardNumber(
             onFocus={ onFocusEvent }
             onBlur={ onBlurEvent }
             onKeyDown={ onKeyDownEvent }
+            onPaste={ onPasteEvent }
         />
     );
 }

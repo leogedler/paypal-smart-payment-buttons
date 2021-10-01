@@ -90,7 +90,8 @@ export type CardType = {|
 
 export type InputEvent = {|
     key : string,
-    target : HTMLInputElement
+    target : HTMLInputElement,
+    type? : string
 |};
 
 export type CardNumberChangeEvent = {|
@@ -128,7 +129,8 @@ export type InputState = {|
     cursorEnd : number,
     keyStrokeCount : number,
     isPossibleValid : boolean,
-    isValid : boolean
+    isValid : boolean,
+    contentPasted? : boolean
 |};
 
 export type InputOptions = {|

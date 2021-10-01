@@ -288,10 +288,10 @@ export function setErrors({ isNumberValid, isCvvValid, isExpiryValid } : {| isNu
 }
 
 // Move cursor within a field
-export function moveCursor(element : HTMLInputElement, start : number, end : number) : mixed {
+export function moveCursor(element : HTMLInputElement, start : number, end? : number) : mixed {
     window.requestAnimationFrame(() => {
         element.selectionStart = start;
-        element.selectionEnd = end;
+        element.selectionEnd = end ?? start;
     });
 }
 
