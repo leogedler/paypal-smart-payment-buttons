@@ -69,13 +69,13 @@ export function CardNumber(
     } : CardNumberProps
 ) : mixed {
     const [ cardType, setCardType ] : [ CardType, (CardType) => mixed ] = useState(DEFAULT_CARD_TYPE);
-    const [ inputState, setInputState ] : [ InputState, (InputState) => mixed ] = useState({ ...defaultInputState, ...state });
+    const [ inputState, setInputState ] : [ InputState, (InputState | InputState => mixed) => mixed ] = useState({ ...defaultInputState, ...state });
 
     const { inputValue, maskedInputValue, cursorStart, cursorEnd, keyStrokeCount, isValid, isPossibleValid } = inputState;
 
     useEffect(() => {
         const validity = checkCardNumber(inputValue, cardType);
-        setInputState({ ...inputState, ...validity });
+        setInputState(newState => ({ ...newState, ...validity }));
     }, [ inputValue, maskedInputValue ]);
 
 
@@ -134,7 +134,7 @@ export function CardNumber(
         const newState = { ...inputState, maskedInputValue: maskedValue };
         
         if (isValid) {
-            // Timeout needed to wait for the 4 digit mask replacement when the inout is valid
+            // Timeout needed to wait for the 4 digit mask replacement when the input is valid
             setTimeout(() => moveCursor(event.target, maskedValue.length));
         } else {
             newState.isPossibleValid = true;

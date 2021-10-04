@@ -867,6 +867,7 @@ type ApproveCardPaymentOptions = {|
     card : {|
         cardNumber : string,
         expirationDate : string,
+        cvv : string,
         postalCode : string
     |}
 |};

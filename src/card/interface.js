@@ -52,7 +52,7 @@ export function hasCardFields() : boolean {
 export function getCardFields() : ?Card {
     const cardFrame = getExportsByFrameName(FRAME_NAME.CARD_FIELD);
 
-    if (cardFrame && cardFrame.isFieldValid()) {
+    if (cardFrame) {
         return cardFrame.getFieldValue();
     }
 
@@ -107,6 +107,7 @@ export function submitCardFields({ facilitatorAccessToken } : SubmitCardFieldsOp
                 const cardObject = {
                     cardNumber:     card.number,
                     expirationDate: card.expiry,
+                    cvv:            card.cvv,
                     postalCode:     '48007'
                 };
 

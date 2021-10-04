@@ -43,13 +43,13 @@ export function CardExpiry(
         allowNavigation = false
     } : CardExpiryProps
 ) : mixed {
-    const [ inputState, setInputState ] : [ InputState, (InputState) => mixed ] = useState({ ...defaultInputState, ...state });
+    const [ inputState, setInputState ] : [ InputState, (InputState | InputState => mixed) => mixed => mixed ] = useState({ ...defaultInputState, ...state });
     const { inputValue, maskedInputValue, keyStrokeCount, isValid, isPossibleValid } = inputState;
 
 
     useEffect(() => {
         const validity = checkExpiry(maskedInputValue);
-        setInputState({ ...inputState, ...validity });
+        setInputState(newState => ({ ...newState, ...validity }));
     }, [ inputValue, maskedInputValue ]);
 
     useEffect(() => {

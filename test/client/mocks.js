@@ -11,7 +11,7 @@ import { isWindowClosed, type CrossDomainWindowType } from 'cross-domain-utils/s
 import { ProxyWindow } from 'post-robot/src/serialize/window';
 
 import type { ZoidComponentInstance, MenuFlowProps } from '../../src/types';
-import { setupButton } from '../../src';
+import { setupButton, setupCard, submitCardFields } from '../../src';
 import { loadFirebaseSDK, clearLsatState } from '../../src/api';
 
 import { triggerKeyPress } from './util';
@@ -138,8 +138,6 @@ export function setupMocks() {
             };
         },
         CardForm: (props) => {
-            props.onAuth = once(props.onAuth);
-
             return {
                 render: () => {
                     props.onAuth({ accessToken: MOCK_BUYER_ACCESS_TOKEN });
@@ -162,6 +160,25 @@ export function setupMocks() {
                 },
                 onError: (err) => {
                     throw err;
+                }
+            };
+        },
+        CardFields: (props) => {
+            return {
+                render: () => {
+                    return props.createOrder().then(orderID => {
+                        return ZalgoPromise.delay(50).then(() => {
+                            return props.onApprove({
+                                orderID,
+                                payerID: 'AAABBBCCC'
+                            }).catch(err => {
+                                return props.onError(err);
+                            });
+                        });
+                    });
+                },
+                submit: () => {
+                    return submitCardFields({ facilitatorAccessToken: 'ABCDEF12345' });
                 }
             };
         },
@@ -200,6 +217,8 @@ export function setupMocks() {
         onInit:    mockAsyncProp(noop),
         onApprove: mockAsyncProp(noop),
         onCancel:  mockAsyncProp(noop),
+        onChange:  mockAsyncProp(noop),
+        export:    mockAsyncProp(noop),
         onError:   mockAsyncProp((err) => {
             throw err;
         }),
@@ -237,6 +256,11 @@ export function setupMocks() {
     cardContainer.id = 'card-fields-container';
     destroyElement(cardContainer);
     body.appendChild(cardContainer);
+
+    const singleCardFieldContainer = document.querySelector('#card-fields-container') || document.createElement('div');
+    singleCardFieldContainer.id = 'card-fields-container';
+    destroyElement(singleCardFieldContainer);
+    body.appendChild(singleCardFieldContainer);
 }
 
 setupMocks();
@@ -352,6 +376,22 @@ export function createButtonHTML({ fundingEligibility = DEFAULT_FUNDING_ELIGIBIL
     }
 
     body.innerHTML += buttons.join('\n');
+}
+
+export function createCardFieldsContainerHTML() : mixed {
+    const fields = [];
+
+    fields.push(`<div id="card-fields-container"></div>`);
+
+    const body = document.body;
+
+    if (!body) {
+        throw new Error('No document.body found');
+    }
+    
+    body.innerHTML += fields.join('\n');
+
+    return document.querySelector('#card-fields-container');
 }
 
 type MockEndpoint = {|
@@ -1505,6 +1545,39 @@ export async function mockSetupButton(overrides? : Object = {}) : Promise<void> 
         sdkMeta: MOCK_SDK_META,
         ...overrides
     });
+}
+
+export async function mockSetupCardFields() : Promise<void> {
+    await setupCard({
+        cspNonce:               '111222333',
+        facilitatorAccessToken: 'ABCDEF12345'
+    });
+}
+
+export function setCardFieldsValues({ number, expiry, cvv } : {| number : string, expiry : string, cvv : string |}) : mixed {
+    const numberInput = document.getElementsByName('number')[0];
+    const expiryInput = document.getElementsByName('expiry')[0];
+    const cvvInput = document.getElementsByName('cvv')[0];
+
+    const eventObj = new Event('input', { bubbles: true });
+
+    if (numberInput) {
+        // $FlowFixMe
+        numberInput.value = number;
+        numberInput.dispatchEvent(eventObj);
+    }
+
+    if (expiryInput) {
+        // $FlowFixMe
+        expiryInput.value = expiry;
+        expiryInput.dispatchEvent(eventObj);
+    }
+
+    if (cvvInput) {
+        // $FlowFixMe
+        cvvInput.value = cvv;
+        cvvInput.dispatchEvent(eventObj);
+    }
 }
 
 type PostRobotMock = {|

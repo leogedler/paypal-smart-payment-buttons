@@ -45,12 +45,12 @@ export function CardCVV(
         cardType
     } : CardCvvProps
 ) : mixed {
-    const [ inputState, setInputState ] : [ InputState, (InputState) => mixed ] = useState({ ...defaultInputState, ...state });
+    const [ inputState, setInputState ] : [ InputState, (InputState | InputState => mixed) => mixed => mixed ] = useState({ ...defaultInputState, ...state });
     const { inputValue, keyStrokeCount, isValid, isPossibleValid } = inputState;
 
     useEffect(() => {
         const validity = checkCVV(inputValue, cardType);
-        setInputState({ ...inputState, ...validity });
+        setInputState(newState => ({ ...newState, ...validity }));
     }, [ inputValue ]);
 
     useEffect(() => {
