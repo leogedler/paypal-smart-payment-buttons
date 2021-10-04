@@ -318,8 +318,9 @@ export function goToPreviousField(ref : {| current : {| base : HTMLInputElement 
 
 // Navigate between fields using the arrow keys and/or the backspace
 export function navigateOnKeyDown(event : InputEvent, navigation : CardNavigation) : mixed {
-    const { target: { value, selectionStart }, key } = event;
-    if (selectionStart === 0 && [ 'Backspace', 'ArrowLeft' ].includes(key)) {
+    const { target: { value, selectionStart, selectionEnd }, key } = event;
+    
+    if (selectionStart === 0 && (value.length === 0 || value.length !== selectionEnd)  && [ 'Backspace', 'ArrowLeft' ].includes(key)) {
         navigation.previous();
     }
 

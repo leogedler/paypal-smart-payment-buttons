@@ -55,17 +55,7 @@ export type FieldStyle = {|
     paddingLeft? : string,
     textAlign? : string,
     textShadow? : string,
-    transition? : string,
-    MozAppearance? : string,
-    MozBoxShadow? : string,
-    MozOsxFontSmoothing? : string,
-    MozTapHighlightColor? : string,
-    MozTransition? : string,
-    WebkitAppearance? : string,
-    WebkitBoxShadow? : string,
-    WebkitFontSmoothing? : string,
-    WebkitTapHighlightColor? : string,
-    WebkitTransition? : string
+    transition? : string
 |};
 
 export type CardStyle = {| |};
