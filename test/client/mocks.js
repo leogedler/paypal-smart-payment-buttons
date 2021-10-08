@@ -1559,24 +1559,37 @@ export function setCardFieldsValues({ number, expiry, cvv } : {| number : string
     const expiryInput = document.getElementsByName('expiry')[0];
     const cvvInput = document.getElementsByName('cvv')[0];
 
-    const eventObj = new Event('input', { bubbles: true });
+    const inputEvent = new Event('input', { bubbles: true });
+    const focusEvent = new Event('focus', { bubbles: true });
+    const blurEvent = new Event('blur', { bubbles: true });
+    const keydownEvent = new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true });
+
 
     if (numberInput) {
+        numberInput.dispatchEvent(focusEvent);
         // $FlowFixMe
         numberInput.value = number;
-        numberInput.dispatchEvent(eventObj);
+        numberInput.dispatchEvent(inputEvent);
+        numberInput.dispatchEvent(keydownEvent);
+        numberInput.dispatchEvent(blurEvent);
     }
 
     if (expiryInput) {
+        expiryInput.dispatchEvent(focusEvent);
         // $FlowFixMe
         expiryInput.value = expiry;
-        expiryInput.dispatchEvent(eventObj);
+        expiryInput.dispatchEvent(inputEvent);
+        expiryInput.dispatchEvent(keydownEvent);
+        expiryInput.dispatchEvent(blurEvent);
     }
 
     if (cvvInput) {
+        cvvInput.dispatchEvent(focusEvent);
         // $FlowFixMe
         cvvInput.value = cvv;
-        cvvInput.dispatchEvent(eventObj);
+        cvvInput.dispatchEvent(inputEvent);
+        cvvInput.dispatchEvent(keydownEvent);
+        cvvInput.dispatchEvent(blurEvent);
     }
 }
 

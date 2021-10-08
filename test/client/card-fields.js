@@ -125,7 +125,7 @@ describe('card fields cases', () => {
 
     });
 
-    it('should render a single card fields and call ProcessPayment mutation with correct card inputs on submit event', async () => {
+    it('should render a single card fields and call ProcessPayment mutation with valid card inputs on submit event', async () => {
 
         return await wrapPromise(async ({ expect, wait }) => {
 
