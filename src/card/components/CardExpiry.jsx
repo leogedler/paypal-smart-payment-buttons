@@ -65,7 +65,7 @@ export function CardExpiry(
     const setDateMask : mixed = (event : InputEvent) : mixed => {
         const { value : rawValue } = event.target;
         const value = removeNonDigits(rawValue);
-        const mask = maskDate(value);
+        const mask = maskDate(value, rawValue);
 
         setInputState({
             ...inputState,

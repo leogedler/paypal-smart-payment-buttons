@@ -141,8 +141,18 @@ export function removeDateMask(date : string) : string {
 
 
 // Mask date
-export function maskDate(date : string) : string {
+export function maskDate(date : string, prevMask? : string = '') : string {
     assertString(date);
+
+    if (prevMask && prevMask.includes('/')) {
+        const [ month ] = removeSpaces(prevMask).split('/');
+        if (month.length < 2) {
+            if (parseInt(month, 10) === 1) {
+                return month;
+            }
+            return `0`;
+        }
+    }
 
     if (date.trim().slice(-1) === '/') {
         return date.slice(0, 2);
