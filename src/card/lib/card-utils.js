@@ -283,12 +283,12 @@ export function setErrors({ isNumberValid, isCvvValid, isExpiryValid } : {| isNu
         errors.push(CARD_ERRORS.INVALID_NUMBER);
     }
 
-    if (!isCvvValid) {
-        errors.push(CARD_ERRORS.INVALID_CVV);
-    }
-
     if (!isExpiryValid) {
         errors.push(CARD_ERRORS.INVALID_EXPIRY);
+    }
+
+    if (!isCvvValid) {
+        errors.push(CARD_ERRORS.INVALID_CVV);
     }
     
     return errors;
@@ -305,8 +305,8 @@ export function moveCursor(element : HTMLInputElement, start : number, end? : nu
 // Navigation helper to go to the next field putting the cursor at the start
 export function goToNextField(ref : {| current : {| base : HTMLInputElement |} |}) : () => void {
     return () => {
-        moveCursor(ref.current.base, 0, 0);
-        ref.current.base.focus();
+        moveCursor(ref.current.base, 0);
+        setTimeout(() => ref.current.base.focus());
     };
 }
 
@@ -317,9 +317,9 @@ export function goToPreviousField(ref : {| current : {| base : HTMLInputElement 
 
         if (value) {
             const valueLength = value.length;
-            moveCursor(ref.current.base, valueLength, valueLength);
+            moveCursor(ref.current.base, valueLength);
         }
-        ref.current.base.focus();
+        setTimeout(() => ref.current.base.focus());
     };
 }
 
