@@ -848,11 +848,9 @@ type TokenizeCardResult = {|
 |};
 
 export function tokenizeCard({ card } : TokenizeCardOptions) : ZalgoPromise<TokenizeCardResult> {
-    // eslint-disable-next-line no-console
-    console.log('Card data', card);
     return ZalgoPromise.try(() => {
         // eslint-disable-next-line no-console
-        console.log('Card Tokenize GQL mutation not yet implemented', { card });
+        console.info('Card Tokenize GQL mutation not yet implemented', { card });
         return {
             paymentMethodToken: uniqueID()
         };
@@ -873,9 +871,6 @@ type ApproveCardPaymentOptions = {|
 |};
 
 export function approveCardPayment({ card, orderID, clientID } : ApproveCardPaymentOptions) : ZalgoPromise<void> {
-    // eslint-disable-next-line no-console
-    console.log('Card data', orderID, clientID, card);
-
     return callGraphQL({
         name:    'ProcessPayment',
         query: `

@@ -4,7 +4,16 @@
 import { h } from 'preact';
 import { useState, useEffect } from 'preact/hooks';
 
-import { maskDate, checkExpiry, removeNonDigits, removeDateMask, defaultNavigation, defaultInputState, navigateOnKeyDown } from '../lib';
+import {
+    maskDate,
+    checkExpiry,
+    removeNonDigits,
+    removeDateMask,
+    defaultNavigation,
+    defaultInputState,
+    navigateOnKeyDown,
+    moveCursor
+} from '../lib';
 import type { CardExpiryChangeEvent, CardNavigation, FieldValidity, InputState, InputEvent } from '../types';
 
 type CardExpiryProps = {|
@@ -63,9 +72,19 @@ export function CardExpiry(
     }, [ isValid, isPossibleValid ]);
 
     const setDateMask : (InputEvent) => void = (event : InputEvent) : void => {
-        const { value : rawValue } = event.target;
+        const { value : rawValue, selectionStart, selectionEnd } = event.target;
         const value = removeNonDigits(rawValue);
         const mask = maskDate(value, rawValue);
+
+        let startCursorPosition = selectionStart;
+        let endCursorPosition = selectionEnd;
+
+        if (mask.trim().slice(-1) === '/') {
+            startCursorPosition = mask.length;
+            endCursorPosition = mask.length;
+        }
+
+        moveCursor(event.target, startCursorPosition, endCursorPosition);
 
         setInputState({
             ...inputState,
