@@ -1560,6 +1560,7 @@ export function setCardFieldsValues({ number, expiry, cvv } : {| number : string
     const cvvInput = document.getElementsByName('cvv')[0];
 
     const inputEvent = new Event('input', { bubbles: true });
+    const pasteEvent = new Event('paste', { bubbles: true });
     const focusEvent = new Event('focus', { bubbles: true });
     const blurEvent = new Event('blur', { bubbles: true });
     const keydownEvent = new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true });
@@ -1569,6 +1570,7 @@ export function setCardFieldsValues({ number, expiry, cvv } : {| number : string
         numberInput.dispatchEvent(focusEvent);
         // $FlowFixMe
         numberInput.value = number;
+        numberInput.dispatchEvent(pasteEvent);
         numberInput.dispatchEvent(inputEvent);
         numberInput.dispatchEvent(keydownEvent);
         numberInput.dispatchEvent(blurEvent);
@@ -1587,6 +1589,7 @@ export function setCardFieldsValues({ number, expiry, cvv } : {| number : string
         cvvInput.dispatchEvent(focusEvent);
         // $FlowFixMe
         cvvInput.value = cvv;
+        cvvInput.dispatchEvent(pasteEvent);
         cvvInput.dispatchEvent(inputEvent);
         cvvInput.dispatchEvent(keydownEvent);
         cvvInput.dispatchEvent(blurEvent);

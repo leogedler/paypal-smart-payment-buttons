@@ -35,12 +35,12 @@ function validateNavigation({ allowNavigation,  inputState } : {| allowNavigatio
 
 type CardNumberProps = {|
     name : string,
-    ref : mixed,
+    ref : () => void,
     type : string,
     state? : InputState,
     className : string,
-    placeholder : mixed,
-    style : mixed,
+    placeholder : string,
+    style : Object,
     maxLength : string,
     navigation? : CardNavigation,
     allowNavigation? : boolean,
@@ -69,7 +69,7 @@ export function CardNumber(
     } : CardNumberProps
 ) : mixed {
     const [ cardType, setCardType ] : [ CardType, (CardType) => mixed ] = useState(DEFAULT_CARD_TYPE);
-    const [ inputState, setInputState ] : [ InputState, (InputState | InputState => mixed) => mixed ] = useState({ ...defaultInputState, ...state });
+    const [ inputState, setInputState ] : [ InputState, (InputState | InputState => InputState) => InputState ] = useState({ ...defaultInputState, ...state });
 
     const { inputValue, maskedInputValue, cursorStart, cursorEnd, keyStrokeCount, isValid, isPossibleValid } = inputState;
 
@@ -91,7 +91,7 @@ export function CardNumber(
     }, [ isValid, isPossibleValid ]);
 
 
-    const setValueAndCursor : mixed = (event : InputEvent) : mixed => {
+    const setValueAndCursor : (InputEvent) => void = (event : InputEvent) : void => {
         const { value: rawValue, selectionStart, selectionEnd } = event.target;
         const value = removeNonDigits(rawValue);
         const detectedCardType = detectCardType(value);
@@ -125,7 +125,7 @@ export function CardNumber(
         onChange({ event, cardNumber: value, cardMaskedNumber: maskedValue, cardType: detectedCardType });
     };
 
-    const onFocusEvent : mixed = (event : InputEvent) : mixed => {
+    const onFocusEvent : (InputEvent) => void = (event : InputEvent) : void => {
         if (typeof onFocus === 'function') {
             onFocus(event);
         }
@@ -143,7 +143,7 @@ export function CardNumber(
         setInputState({ ...newState });
     };
 
-    const onBlurEvent : mixed = (event : InputEvent) : mixed => {
+    const onBlurEvent : (InputEvent) => void = (event : InputEvent) : void => {
         const newState = { ...inputState };
 
         if (isValid) {
@@ -160,13 +160,13 @@ export function CardNumber(
 
     };
 
-    const onKeyDownEvent : mixed = (event : InputEvent) => {
+    const onKeyDownEvent : (InputEvent) => void = (event : InputEvent) : void => {
         if (allowNavigation) {
             navigateOnKeyDown(event, navigation);
         }
     };
 
-    const onPasteEvent : mixed = () => {
+    const onPasteEvent : (InputEvent) => void = () : void => {
         const newState = { ...inputState, contentPasted: true };
         setInputState(newState);
     };

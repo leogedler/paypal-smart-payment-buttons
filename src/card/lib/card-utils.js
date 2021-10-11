@@ -78,13 +78,13 @@ export function splice(str : string, idx : number, insert : string) : string {
 }
 
 
-export function assertType(assertion : () => void, errorMsg : string) : mixed {
+export function assertType(assertion : () => void, errorMsg : string) : void | TypeError {
     if (!assertion) {
         throw new TypeError(errorMsg);
     }
 }
 
-export function assertString<T>(...args : T) : mixed {
+export function assertString<T>(...args : T) : void | TypeError {
     // $FlowFixMe
     assertType(args.every((s) => typeof s === 'string'), 'Expected a string');
 }
@@ -298,7 +298,7 @@ export function setErrors({ isNumberValid, isCvvValid, isExpiryValid } : {| isNu
 }
 
 // Move cursor within a field
-export function moveCursor(element : HTMLInputElement, start : number, end? : number) : mixed {
+export function moveCursor(element : HTMLInputElement, start : number, end? : number) : void {
     window.requestAnimationFrame(() => {
         element.selectionStart = start;
         element.selectionEnd = end ?? start;
@@ -327,7 +327,7 @@ export function goToPreviousField(ref : {| current : {| base : HTMLInputElement 
 }
 
 // Navigate between fields using the arrow keys and/or the backspace
-export function navigateOnKeyDown(event : InputEvent, navigation : CardNavigation) : mixed {
+export function navigateOnKeyDown(event : InputEvent, navigation : CardNavigation) : void {
     const { target: { value, selectionStart, selectionEnd }, key } = event;
     
     if (selectionStart === 0 && (value.length === 0 || value.length !== selectionEnd)  && [ 'Backspace', 'ArrowLeft' ].includes(key)) {

@@ -9,12 +9,12 @@ import type { CardType, CardCvvChangeEvent, CardNavigation, FieldValidity, Input
 
 type CardCvvProps = {|
     name : string,
-    ref : mixed,
+    ref : () => void,
     type : string,
     state? : InputState,
     className : string,
-    placeholder : mixed,
-    style : mixed,
+    placeholder : string,
+    style : Object,
     maxLength : string,
     cardType : CardType,
     navigation : CardNavigation,
@@ -45,7 +45,7 @@ export function CardCVV(
         cardType
     } : CardCvvProps
 ) : mixed {
-    const [ inputState, setInputState ] : [ InputState, (InputState | InputState => mixed) => mixed => mixed ] = useState({ ...defaultInputState, ...state });
+    const [ inputState, setInputState ] : [ InputState, (InputState | InputState => InputState) => InputState ] = useState({ ...defaultInputState, ...state });
     const { inputValue, keyStrokeCount, isValid, isPossibleValid } = inputState;
 
     useEffect(() => {
@@ -62,7 +62,7 @@ export function CardCVV(
         }
     }, [ isValid, isPossibleValid ]);
 
-    const setCvvValue : mixed = (event : InputEvent) : mixed => {
+    const setCvvValue : (InputEvent) => void = (event : InputEvent) : void => {
         const { value : rawValue } = event.target;
         const value = removeNonDigits(rawValue);
 
@@ -76,13 +76,13 @@ export function CardCVV(
         onChange({ event, cardCvv: value  });
     };
 
-    const onKeyDownEvent : mixed = (event : InputEvent) => {
+    const onKeyDownEvent : (InputEvent) => void = (event : InputEvent) : void => {
         if (allowNavigation) {
             navigateOnKeyDown(event, navigation);
         }
     };
 
-    const onFocusEvent : mixed = (event : InputEvent) => {
+    const onFocusEvent : (InputEvent) => void = (event : InputEvent) : void => {
         if (typeof onFocus === 'function') {
             onFocus(event);
         }
@@ -91,7 +91,7 @@ export function CardCVV(
         }
     };
 
-    const onBlurEvent : mixed = (event : InputEvent) => {
+    const onBlurEvent : (InputEvent) => void = (event : InputEvent) : void => {
         if (typeof onBlur === 'function') {
             onBlur(event);
         }

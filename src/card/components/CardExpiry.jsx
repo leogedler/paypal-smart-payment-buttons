@@ -13,8 +13,8 @@ type CardExpiryProps = {|
     type : string,
     state? : InputState,
     className : string,
-    placeholder : mixed,
-    style : mixed,
+    placeholder : string,
+    style : Object,
     maxLength : string,
     navigation : CardNavigation,
     allowNavigation : boolean,
@@ -43,7 +43,7 @@ export function CardExpiry(
         allowNavigation = false
     } : CardExpiryProps
 ) : mixed {
-    const [ inputState, setInputState ] : [ InputState, (InputState | InputState => mixed) => mixed => mixed ] = useState({ ...defaultInputState, ...state });
+    const [ inputState, setInputState ] : [ InputState, (InputState | InputState => InputState) => InputState ] = useState({ ...defaultInputState, ...state });
     const { inputValue, maskedInputValue, keyStrokeCount, isValid, isPossibleValid } = inputState;
 
 
@@ -62,7 +62,7 @@ export function CardExpiry(
         }
     }, [ isValid, isPossibleValid ]);
 
-    const setDateMask : mixed = (event : InputEvent) : mixed => {
+    const setDateMask : (InputEvent) => void = (event : InputEvent) : void => {
         const { value : rawValue } = event.target;
         const value = removeNonDigits(rawValue);
         const mask = maskDate(value, rawValue);
@@ -78,7 +78,7 @@ export function CardExpiry(
 
     };
 
-    const onKeyDownEvent : mixed = (event : InputEvent) => {
+    const onKeyDownEvent : (InputEvent) => void = (event : InputEvent) : void => {
         const { target: { value }, key } = event;
 
         const last = value.trim().slice(-1);
@@ -92,7 +92,7 @@ export function CardExpiry(
         }
     };
 
-    const onFocusEvent : mixed = (event : InputEvent) => {
+    const onFocusEvent : (InputEvent) => void = (event : InputEvent) : void => {
         if (typeof onFocus === 'function') {
             onFocus(event);
         }
@@ -101,7 +101,7 @@ export function CardExpiry(
         }
     };
 
-    const onBlurEvent : mixed = (event : InputEvent) => {
+    const onBlurEvent : (InputEvent) => void = (event : InputEvent) : void => {
         if (typeof onBlur === 'function') {
             onBlur(event);
         }

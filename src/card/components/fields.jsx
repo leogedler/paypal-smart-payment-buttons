@@ -86,7 +86,7 @@ export function CardField({ cspNonce, onChange, styleObject = {}, placeholder = 
         cardType
     ]);
 
-    const onChangeNumber : mixed = ({ cardNumber, cardType : type } : CardNumberChangeEvent) => {
+    const onChangeNumber : (CardNumberChangeEvent) => void = ({ cardNumber, cardType : type } : CardNumberChangeEvent) : void => {
         setNumber(cardNumber);
         setCardType({ ...type });
     };

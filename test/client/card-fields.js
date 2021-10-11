@@ -28,6 +28,21 @@ describe('card fields cases', () => {
 
             window.xprops.type = CARD_FIELD_TYPE.SINGLE;
             window.xprops.intent = INTENT.CAPTURE;
+            window.xprops.style = {
+                'height':          '60px',
+                'padding':         '10px',
+                'fontSize':        '18px',
+                'fontFamily':      '"Open Sans", sans-serif',
+                'transition':      'all 0.5s ease-out',
+                'input.invalid': {
+                    color: 'red'
+                }
+            };
+            window.xprops.placeholder = {
+                number: 'Card number',
+                expiry: 'MM/YY',
+                cvv:    'CVV'
+            };
 
             window.xprops.createOrder = mockAsyncProp(expect('createOrder', async () => {
                 return ZalgoPromise.try(() => {
@@ -134,6 +149,21 @@ describe('card fields cases', () => {
 
             window.xprops.type = CARD_FIELD_TYPE.SINGLE;
             window.xprops.intent = INTENT.CAPTURE;
+            window.xprops.style = {
+                'height':          '60px',
+                'padding':         '10px',
+                'fontSize':        '18px',
+                'fontFamily':      '"Open Sans", sans-serif',
+                'transition':      'all 0.5s ease-out',
+                'input.invalid': {
+                    color: 'red'
+                }
+            };
+            window.xprops.placeholder = {
+                number: 'Card number',
+                expiry: 'MM/YY',
+                cvv:    'CVV'
+            };
 
 
             const gqlMock = getGraphQLApiMock({
@@ -235,6 +265,21 @@ describe('card fields cases', () => {
 
             window.xprops.type = CARD_FIELD_TYPE.SINGLE;
             window.xprops.intent = INTENT.CAPTURE;
+            window.xprops.style = {
+                'height':          '60px',
+                'padding':         '10px',
+                'fontSize':        '18px',
+                'fontFamily':      '"Open Sans", sans-serif',
+                'transition':      'all 0.5s ease-out',
+                'input.invalid': {
+                    color: 'red'
+                }
+            };
+            window.xprops.placeholder = {
+                number: 'Card number',
+                expiry: 'MM/YY',
+                cvv:    'CVV'
+            };
 
 
             const gqlMock = getGraphQLApiMock({
