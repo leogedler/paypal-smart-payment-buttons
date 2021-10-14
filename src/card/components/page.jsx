@@ -37,7 +37,7 @@ function Page({ cspNonce, props } : PageProps) : mixed {
 
     useEffect(() => {
         onChange({
-            valid:    fieldValid,
+            valid:  fieldValid,
             errors: fieldErrors
         });
     }, [ fieldValid, fieldErrors ]);
@@ -61,7 +61,17 @@ function Page({ cspNonce, props } : PageProps) : mixed {
     }, [ fieldValid, fieldValue ]);
 
     const onFieldChange = ({ value, valid, errors }) => {
-        setFieldValue({ ...value });
+        let newValue;
+
+        // Single card field case
+        if (typeof value === 'object') {
+            newValue = { ...value };
+        // Individual field case
+        } else {
+            newValue = value;
+        }
+        
+        setFieldValue(newValue);
         setFieldErrors([ ...errors ]);
         setFieldValid(valid);
     };
