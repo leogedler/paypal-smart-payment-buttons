@@ -225,14 +225,16 @@ export function checkForNonDigits(value : string) : boolean {
     return (/\D/g).test(removeSpaces(value));
 }
 
-export function getCvvLength(cardType : CardType) : number {
-    const { code } = cardType;
+export function getCvvLength(cardType? : CardType) : number {
+    if (cardType && typeof cardType === 'object') {
+        const { code } = cardType;
 
-    if (typeof code === 'object') {
-        const { size } = code;
+        if (typeof code === 'object') {
+            const { size } = code;
 
-        if (typeof size === 'number') {
-            return size;
+            if (typeof size === 'number') {
+                return size;
+            }
         }
     }
 
@@ -276,18 +278,18 @@ export function checkExpiry(value : string) : {| isValid : boolean, isPossibleVa
     };
 }
 
-export function setErrors({ isNumberValid, isCvvValid, isExpiryValid } : {| isNumberValid : boolean, isCvvValid : boolean, isExpiryValid : boolean |}) : [$Values<typeof CARD_ERRORS>] | [] {
+export function setErrors({ isNumberValid, isCvvValid, isExpiryValid } : {| isNumberValid? : boolean, isCvvValid? : boolean, isExpiryValid? : boolean |}) : [$Values<typeof CARD_ERRORS>] | [] {
     const errors = [];
 
-    if (!isNumberValid) {
+    if (typeof isNumberValid === 'boolean' && !isNumberValid) {
         errors.push(CARD_ERRORS.INVALID_NUMBER);
     }
 
-    if (!isExpiryValid) {
+    if (typeof isExpiryValid === 'boolean' && !isExpiryValid) {
         errors.push(CARD_ERRORS.INVALID_EXPIRY);
     }
 
-    if (!isCvvValid) {
+    if (typeof isCvvValid === 'boolean' &&  !isCvvValid) {
         errors.push(CARD_ERRORS.INVALID_CVV);
     }
     

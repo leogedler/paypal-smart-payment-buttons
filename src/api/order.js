@@ -865,7 +865,7 @@ type ApproveCardPaymentOptions = {|
     card : {|
         cardNumber : string,
         expirationDate : string,
-        cvv : string,
+        cvv? : string,
         postalCode : string
     |}
 |};
@@ -882,7 +882,7 @@ export function approveCardPayment({ card, orderID, clientID } : ApproveCardPaym
             ) {
                 processPayment(
                     clientID: $clientID
-                    paymentMethod: { type: CREDIT_CARD, card: $card }
+                    paymentMethod: { type: CARD, card: $card }
                     branded: $branded
                     token: $orderID
                     buttonSessionID: "f7r7367r4"

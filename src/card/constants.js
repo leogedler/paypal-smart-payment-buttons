@@ -108,6 +108,7 @@ export const DEFAULT_INPUT_STYLE : FieldStyle = {
     border:     'none',
     background: 'transparent',
     height:     '100%',
+    width:      '100%',
     fontFamily: 'monospace',
     fontSize:   '50vh',
     display:    'inline-block'

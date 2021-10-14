@@ -22,7 +22,8 @@ import type {
     CardExpiryChangeEvent,
     CardCvvChangeEvent,
     FieldValidity,
-    CardNavigation
+    CardNavigation,
+    CardType
 } from '../types';
 import {
     CARD_ERRORS,
@@ -45,15 +46,15 @@ type CardFieldProps = {|
 |};
 
 export function CardField({ cspNonce, onChange, styleObject = {}, placeholder = {} } : CardFieldProps) : mixed {
-    const [ number, setNumber ] = useState('');
-    const [ cvv, setCvv ] = useState('');
-    const [ expiry, setExpiry ] = useState('');
-    const [ isValid, setIsValid ] = useState(true);
-    const [ numberValidity, setNumberValidity ] = useState(initFieldValidity);
-    const [ expiryValidity, setExpiryValidity ] = useState(initFieldValidity);
-    const [ cvvValidity, setCvvValidity ] = useState(initFieldValidity);
+    const [ number, setNumber ] : [ string, (string) => string ] = useState('');
+    const [ cvv, setCvv ] : [ string, (string) => string ] = useState('');
+    const [ expiry, setExpiry ] : [ string, (string) => string ] = useState('');
+    const [ isValid, setIsValid ] : [ boolean, (boolean) => boolean ] = useState(true);
+    const [ numberValidity, setNumberValidity ] : [ FieldValidity, (FieldValidity) => FieldValidity ] = useState(initFieldValidity);
+    const [ expiryValidity, setExpiryValidity ] : [ FieldValidity, (FieldValidity) => FieldValidity ] = useState(initFieldValidity);
+    const [ cvvValidity, setCvvValidity ] : [ FieldValidity, (FieldValidity) => FieldValidity ] = useState(initFieldValidity);
+    const [ cardType, setCardType ] : [ CardType, (CardType) => CardType ] = useState(DEFAULT_CARD_TYPE);
     const [ generalStyle, inputStyle ] = getStyles(styleObject);
-    const [ cardType, setCardType ] = useState(DEFAULT_CARD_TYPE);
     const numberRef = useRef();
     const expiryRef = useRef();
     const cvvRef = useRef();
@@ -148,24 +149,23 @@ export function CardField({ cspNonce, onChange, styleObject = {}, placeholder = 
 
 type CardNumberFieldProps = {|
     cspNonce : string,
-    onChange : ({| value : string, valid : boolean |}) => void,
+    onChange : ({| value : string, valid : boolean, errors : [$Values<typeof CARD_ERRORS>] | [] |}) => void,
     styleObject : CardStyle,
    placeholder : {| number? : string, expiry? : string, cvv? : string  |}
 |};
 
 export function CardNumberField({ cspNonce, onChange, styleObject = {}, placeholder = {} } : CardNumberFieldProps) : mixed {
-    const [ number, setNumber ] = useState('');
-    const [ numberValidity, setNumberValidity ] = useState(true);
+    const [ number, setNumber ] : [ string, (string) => string ] = useState('');
+    const [ numberValidity, setNumberValidity ] : [ FieldValidity, (FieldValidity) => FieldValidity ] = useState(initFieldValidity);
     const [ generalStyle, inputStyle ] = getStyles(styleObject);
 
     const composedStyles = { ...{ input: DEFAULT_INPUT_STYLE },  ...generalStyle };
 
     useEffect(() => {
-        setNumberValidity(number);
-        const valid = Boolean(number);
-        const value = number;
-        onChange({ value, valid });
-    }, [ number ]);
+        const errors = setErrors({ isNumberValid: numberValidity.isValid });
+
+        onChange({ value: number, valid: numberValidity.isValid, errors });
+    }, [ number, numberValidity ]);
 
     return (
         <Fragment>
@@ -190,23 +190,23 @@ export function CardNumberField({ cspNonce, onChange, styleObject = {}, placehol
 
 type CardExpiryFieldProps = {|
     cspNonce : string,
-    onChange : ({| value : string, valid : boolean |}) => void,
+    onChange : ({| value : string, valid : boolean, errors : [$Values<typeof CARD_ERRORS>] | [] |}) => void,
     styleObject : CardStyle,
     placeholder : {| number? : string, expiry? : string, cvv? : string  |}
 |};
 
 export function CardExpiryField({ cspNonce, onChange, styleObject = {}, placeholder = {} } : CardExpiryFieldProps) : mixed {
-    const [ expiry, setExpiry ] = useState('');
-    const [ expiryValidity, setExpiryValidity ] = useState(true);
+    const [ expiry, setExpiry ] : [ string, (string) => string ] = useState('');
+    const [ expiryValidity, setExpiryValidity ] : [ FieldValidity, (FieldValidity) => FieldValidity ] = useState(initFieldValidity);
     const [ generalStyle, inputStyle ] = getStyles(styleObject);
 
     const composedStyles = { ...{ input: DEFAULT_INPUT_STYLE },  ...generalStyle };
 
     useEffect(() => {
-        setExpiryValidity(expiry);
-        const valid = Boolean(expiry);
-        onChange({ value: expiry, valid });
-    }, [ expiry ]);
+        const errors = setErrors({ isExpiryValid: expiryValidity.isValid });
+
+        onChange({ value: expiry, valid: expiryValidity.isValid, errors });
+    }, [ expiry, expiryValidity ]);
 
     return (
         <Fragment>
@@ -217,36 +217,36 @@ export function CardExpiryField({ cspNonce, onChange, styleObject = {}, placehol
             <CardExpiry
                 type='text'
                 // eslint-disable-next-line react/forbid-component-props
-                className={ expiryValidity ? 'expiry valid' : 'expiry invalid' }
+                className={ expiryValidity.isPossibleValid || expiryValidity.isValid ? 'expiry valid' : 'expiry invalid' }
                 // eslint-disable-next-line react/forbid-component-props
                 style={ inputStyle }
                 placeholder={ placeholder.expiry ?? DEFAULT_PLACEHOLDERS.expiry }
                 maxLength='7'
-                onChange={ ({ maskedDate } : CardExpiryChangeEvent) => setExpiry(maskedDate) }
-                onValidityChange={ (expiryValidityity : boolean) => setExpiryValidity(expiryValidityity) }
+                onChange={ ({ maskedDate } : CardExpiryChangeEvent) => setExpiry(convertDateFormat(maskedDate)) }
+                onValidityChange={ (expiryValidityity : FieldValidity) => setExpiryValidity(expiryValidityity) }
             />
         </Fragment>
     );
 }
 type CardCvvFieldProps = {|
     cspNonce : string,
-    onChange : ({| value : string, valid : boolean |}) => void,
+    onChange : ({| value : string, valid : boolean, errors : [$Values<typeof CARD_ERRORS>] | [] |}) => void,
     styleObject : CardStyle,
     placeholder : {| number? : string, expiry? : string, cvv? : string  |}
 |};
 
 export function CardCVVField({ cspNonce, onChange, styleObject = {}, placeholder = {} } : CardCvvFieldProps) : mixed {
-    const [ cvv, setCvv ] = useState('');
-    const [ cvvValidity, setCvvValidity ] = useState(true);
+    const [ cvv, setCvv ] : [ string, (string) => string ] = useState('');
+    const [ cvvValidity, setCvvValidity ] : [ FieldValidity, (FieldValidity) => FieldValidity ] = useState(initFieldValidity);
     const [ generalStyle, inputStyle ] = getStyles(styleObject);
     
     const composedStyles = { ...{ input: DEFAULT_INPUT_STYLE },  ...generalStyle };
 
     useEffect(() => {
-        setCvvValidity(cvv);
-        const valid = Boolean(cvv);
-        onChange({ value: cvv, valid });
-    }, [ cvv ]);
+        const errors = setErrors({ isCvvValid: cvvValidity.isValid });
+
+        onChange({ value: cvv, valid: cvvValidity.isValid, errors });
+    }, [ cvv, cvvValidity ]);
 
     return (
         <Fragment>
@@ -257,13 +257,13 @@ export function CardCVVField({ cspNonce, onChange, styleObject = {}, placeholder
             <CardCVV
                 type='text'
                 // eslint-disable-next-line react/forbid-component-props
-                className={ cvvValidity ? 'cvv valid' : 'cvv invalid' }
+                className={ cvvValidity.isPossibleValid || cvvValidity.isValid ? 'cvv valid' : 'cvv invalid' }
                 // eslint-disable-next-line react/forbid-component-props
                 style={ inputStyle }
                 placeholder={ placeholder.cvv ?? DEFAULT_PLACEHOLDERS.cvv }
                 maxLength='4'
                 onChange={ ({ cardCvv } : CardCvvChangeEvent) => setCvv(cardCvv) }
-                onValidityChange={ (cvvValidityity : boolean) => setCvvValidity(cvvValidityity) }
+                onValidityChange={ (cvvValidityity : FieldValidity) => setCvvValidity(cvvValidityity) }
             />
         </Fragment>
     );
