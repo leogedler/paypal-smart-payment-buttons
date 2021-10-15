@@ -351,3 +351,35 @@ export function convertDateFormat(date : string) : string {
 
     return formattedDate;
 }
+
+
+// Safari (both iOS and Desktop) has an unconvential behavior,
+// where it won't let an iframe that includes an input get
+// focus programatically from outisde of the input.
+// Big props to the devs at Stripe that figured out
+// you run this selection range hack to force the focus back
+// onto the input.
+export function autoFocusOnFirstInput(input : HTMLInputElement) {
+    window.addEventListener('focus', () => {
+        setTimeout(() => {
+            if (document.activeElement === document.body || document.activeElement === document.documentElement) {
+                const inputIsEmptyInitially = input.value === '';
+
+                if (inputIsEmptyInitially) {
+                    input.value = ' ';
+                }
+
+                const start = input.selectionStart;
+                const end = input.selectionEnd;
+
+                input.setSelectionRange(0, 0);
+                input.setSelectionRange(start, end);
+
+                if (inputIsEmptyInitially) {
+                    input.value = '';
+                }
+                input.focus();
+            }
+        }, 1);
+    });
+}

@@ -72,7 +72,7 @@ export function CardNumber(
     const [ inputState, setInputState ] : [ InputState, (InputState | InputState => InputState) => InputState ] = useState({ ...defaultInputState, ...state });
 
     const { inputValue, maskedInputValue, cursorStart, cursorEnd, keyStrokeCount, isValid, isPossibleValid } = inputState;
-
+    
     useEffect(() => {
         const validity = checkCardNumber(inputValue, cardType);
         setInputState(newState => ({ ...newState, ...validity }));
