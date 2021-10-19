@@ -107,7 +107,7 @@ export function submitCardFields({ facilitatorAccessToken } : SubmitCardFieldsOp
                 const cardObject = {
                     cardNumber:     card.number,
                     expirationDate: card.expiry,
-                    // cvv:         card.cvv, // not required yet
+                    cvv:            card.cvv,
                     postalCode:     '48007'
                 };
 
