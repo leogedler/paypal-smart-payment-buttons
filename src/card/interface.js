@@ -52,7 +52,7 @@ export function hasCardFields() : boolean {
 export function getCardFields() : ?Card {
     const cardFrame = getExportsByFrameName(FRAME_NAME.CARD_FIELD);
 
-    if (cardFrame) {
+    if (cardFrame && cardFrame.isFieldValid()) {
         return cardFrame.getFieldValue();
     }
 
@@ -71,6 +71,8 @@ export function getCardFields() : ?Card {
             expiry: cardExpiryFrame.getFieldValue()
         };
     }
+
+    throw new Error(`Card fields not available to submit`);
 }
 
 type SubmitCardFieldsOptions = {|
@@ -79,7 +81,7 @@ type SubmitCardFieldsOptions = {|
 
 export function submitCardFields({ facilitatorAccessToken } : SubmitCardFieldsOptions) : ZalgoPromise<void> {
     const { intent, branded, vault, createOrder, onApprove, clientID } = getCardProps({ facilitatorAccessToken });
-    
+
     return ZalgoPromise.try(() => {
         if (!hasCardFields()) {
             throw new Error(`Card fields not available to submit`);

@@ -241,7 +241,7 @@ describe('card fields cases', () => {
 
                     setTimeout(() => {
                         cardFieldInstance.submit();
-                    }, 10);
+                    }, 20);
 
                     return cardFieldInstance;
                 }));
@@ -283,7 +283,6 @@ describe('card fields cases', () => {
                     expiry: 'MM/YY',
                     cvv:    'CVV'
                 };
-
 
                 const gqlMock = getGraphQLApiMock({
                     extraHandler: ({ data }) => {
@@ -641,16 +640,16 @@ describe('card fields cases', () => {
                                 throw new Error('Expected card data to be passed');
                             }
 
-                            if (data.variables.card.cardNumber !== '5555555555554443') {
-                                throw new Error(`Expected card number to be 5555555555554444 but got ${ data.variables.card.cardNumber }`);
+                            if (data.variables.card.cardNumber !== cardNumber) {
+                                throw new Error(`Expected card number to be ${ cardNumber } but got ${ data.variables.card.cardNumber }`);
                             }
 
-                            if (data.variables.card.expirationDate !== '01/2022') {
-                                throw new Error(`Expected expiry to be 01/2022 but got ${ data.variables.card.expirationDate }`);
+                            if (data.variables.card.expirationDate !== cardExpiry) {
+                                throw new Error(`Expected expiry to be ${ cardExpiry } but got ${ data.variables.card.expirationDate }`);
                             }
 
-                            if (data.variables.card.cvv !== '123') {
-                                throw new Error(`Expected CVV to be 123 but got ${ data.variables.card.cvv }`);
+                            if (data.variables.card.cvv !== cardCvv) {
+                                throw new Error(`Expected CVV to be ${ cardCvv } but got ${ data.variables.card.cvv }`);
                             }
 
                             return {
@@ -683,27 +682,70 @@ describe('card fields cases', () => {
 
                     const cardFieldInstance = CardFieldOriginal(props);
 
-                    mockFunction(cardFieldInstance, 'NumberField', expect('NumberField', ({ original: numberFieldToOriginal, args }) => {
+                    mockFunction(cardFieldInstance, 'NumberField', expect('NumberField', ({ original: NumberFieldToOriginal, args: numberArgs }) => {
+
+                        const numberFieldToOriginal = NumberFieldToOriginal(...numberArgs);
+
+                        mockFunction(numberFieldToOriginal, 'render', expect('render', async ({ original: renderToOriginal, args }) => {
+                            return props.createOrder().then(id => {
+
+                                if (id !== orderID) {
+                                    throw new Error(`Expected orderID to be ${ orderID }, got ${ id }`);
+                                }
+
+                                return renderToOriginal(...args);
+                            });
+                        }));
                         
                         renderCardFieldMock({ name: 'card-number-field', isFieldValid: () => true, getFieldValue: () => cardNumber });
                         setCardFieldsValues({ number: cardNumber });
-                        return numberFieldToOriginal(...args);
+                        return numberFieldToOriginal;
                         
                     }));
 
-                    mockFunction(cardFieldInstance, 'ExpiryField', expect('ExpiryField', ({ original: expiryFieldToOriginal, args }) => {
+                    mockFunction(cardFieldInstance, 'ExpiryField', expect('ExpiryField', ({ original: ExpiryFieldToOriginal, args: expiryArgs }) => {
+
+                        const expiryFieldToOriginal = ExpiryFieldToOriginal(...expiryArgs);
+
+                        mockFunction(expiryFieldToOriginal, 'render', expect('render', async ({ original: renderToOriginal, args }) => {
+                            return props.createOrder().then(id => {
+
+                                if (id !== orderID) {
+                                    throw new Error(`Expected orderID to be ${ orderID }, got ${ id }`);
+                                }
+
+                                return renderToOriginal(...args);
+                            });
+                        }));
                         
                         renderCardFieldMock({ name: 'card-expiry-field', isFieldValid: () => true, getFieldValue: () => cardExpiry });
                         setCardFieldsValues({ expiry: cardExpiry });
-                        return expiryFieldToOriginal(...args);
+                        return expiryFieldToOriginal;
                         
                     }));
 
-                    mockFunction(cardFieldInstance, 'CVVField', expect('CVVField', ({ original: cvvFieldToOriginal, args }) => {
+                    mockFunction(cardFieldInstance, 'CVVField', expect('CVVField', ({ original: CvvFieldToOriginal, args: cvvArgs }) => {
+
+                        const cVVFieldToOriginal = CvvFieldToOriginal(...cvvArgs);
+
+                        mockFunction(cVVFieldToOriginal, 'render', expect('render', async ({ original: renderToOriginal, args }) => {
+                            return props.createOrder().then(id => {
+
+                                if (id !== orderID) {
+                                    throw new Error(`Expected orderID to be ${ orderID }, got ${ id }`);
+                                }
+
+                                setTimeout(() => {
+                                    cardFieldInstance.submit();
+                                }, 20);
+
+                                return renderToOriginal(...args);
+                            });
+                        }));
                         
                         renderCardFieldMock({ name: 'card-cvv-field', isFieldValid: () => true, getFieldValue: () => cardCvv });
                         setCardFieldsValues({ cvv: cardCvv });
-                        return cvvFieldToOriginal(...args);
+                        return cVVFieldToOriginal;
                         
                     }));
 
@@ -712,8 +754,192 @@ describe('card fields cases', () => {
                     }));
 
 
+                    return cardFieldInstance;
+                }));
+
+
+                const numberContainer = createCardFieldsContainerHTML('number');
+                const expiryContainer = createCardFieldsContainerHTML('expiry');
+                const cvvContainer = createCardFieldsContainerHTML('cvv');
+
+                const cardFields = window.paypal.CardFields(window.xprops);
+
+                window.xprops.type = CARD_FIELD_TYPE.NUMBER;
+                await mockSetupCardFields();
+                cardFields.NumberField(window.xprops).render(numberContainer);
+                
+                window.xprops.type = CARD_FIELD_TYPE.EXPIRY;
+                await mockSetupCardFields();
+                cardFields.ExpiryField(window.xprops).render(expiryContainer);
+
+                window.xprops.type = CARD_FIELD_TYPE.CVV;
+                await mockSetupCardFields();
+                cardFields.CVVField(window.xprops).render(cvvContainer);
+            
+                await wait();
+                gqlMock.done();
+
+            });
+
+        });
+
+        it('should render multi card fields and not call ProcessPayment mutation with invalid card inputs on submit', async () => {
+
+            return await wrapPromise(async ({ expect, wait }) => {
+
+                const orderID = generateOrderID();
+                const payerID = 'AAABBBCCC';
+
+                window.xprops.intent = INTENT.CAPTURE;
+                window.xprops.style = {
+                    'height':          '60px',
+                    'padding':         '10px',
+                    'fontSize':        '18px',
+                    'fontFamily':      '"Open Sans", sans-serif',
+                    'transition':      'all 0.5s ease-out',
+                    'input.invalid': {
+                        color: 'red'
+                    }
+                };
+                window.xprops.placeholder = {
+                    number: 'Card number',
+                    expiry: 'MM/YY',
+                    cvv:    'CVV'
+                };
+
+                const cardNumber = '55555555555';
+                const cardExpiry = '01/20';
+                const cardCvv = '12';
+
+                renderCardFieldMock({ name: 'card-cvv-field', isFieldValid: () => true, getFieldValue: () => cardCvv });
+
+                const gqlMock = getGraphQLApiMock({
+                    extraHandler: ({ data }) => {
+                        if (!data.variables.orderID) {
+                            throw new Error(`Expected orderID to be passed`);
+                        }
+
+                        if (data.query.includes('mutation ProcessPayment')) {
+
+                            if (!data.variables.card) {
+                                throw new Error('Expected card data to be passed');
+                            }
+
+                            if (data.variables.card.cardNumber !== cardNumber) {
+                                throw new Error(`Expected card number to be ${ cardNumber } but got ${ data.variables.card.cardNumber }`);
+                            }
+
+                            if (data.variables.card.expirationDate !== cardExpiry) {
+                                throw new Error(`Expected expiry to be ${ cardExpiry } but got ${ data.variables.card.expirationDate }`);
+                            }
+
+                            if (data.variables.card.cvv !== cardCvv) {
+                                throw new Error(`Expected CVV to be ${ cardCvv } but got ${ data.variables.card.cvv }`);
+                            }
+
+                            return {
+                                data: {
+                                    processPayment: 'APPROVED'
+                                }
+                            };
+                        }
+                    }
+                }).listen();
+
+                window.xprops.createOrder = mockAsyncProp(expect('createOrder', async () => {
+                    return ZalgoPromise.try(() => {
+                        return orderID;
+                    });
+                }));
+
+                window.xprops.onApprove = mockAsyncProp(expect('onApprove', async (data) => {
+                    if (data.orderID !== orderID) {
+                        throw new Error(`Expected orderID to be ${ orderID }, got ${ data.orderID }`);
+                    }
+
+                    if (data.payerID !== payerID) {
+                        throw new Error(`Expected payerID to be ${ payerID }, got ${ data.payerID }`);
+                    }
+                }));
+
+
+                mockFunction(window.paypal, 'CardFields', expect('CardFields', ({ original: CardFieldOriginal, args: [ props ] }) => {
+
+                    const cardFieldInstance = CardFieldOriginal(props);
+
+                    mockFunction(cardFieldInstance, 'NumberField', expect('NumberField', ({ original: NumberFieldToOriginal, args: numberArgs }) => {
+
+                        const numberFieldToOriginal = NumberFieldToOriginal(...numberArgs);
+
+                        mockFunction(numberFieldToOriginal, 'render', expect('render', async ({ original: renderToOriginal, args }) => {
+                            return props.createOrder().then(id => {
+
+                                if (id !== orderID) {
+                                    throw new Error(`Expected orderID to be ${ orderID }, got ${ id }`);
+                                }
+
+                                return renderToOriginal(...args);
+                            });
+                        }));
+                        
+                        renderCardFieldMock({ name: 'card-number-field', isFieldValid: () => true, getFieldValue: () => cardNumber });
+                        setCardFieldsValues({ number: cardNumber });
+                        return numberFieldToOriginal;
+                        
+                    }));
+
+                    mockFunction(cardFieldInstance, 'ExpiryField', expect('ExpiryField', ({ original: ExpiryFieldToOriginal, args: expiryArgs }) => {
+
+                        const expiryFieldToOriginal = ExpiryFieldToOriginal(...expiryArgs);
+
+                        mockFunction(expiryFieldToOriginal, 'render', expect('render', async ({ original: renderToOriginal, args }) => {
+                            return props.createOrder().then(id => {
+
+                                if (id !== orderID) {
+                                    throw new Error(`Expected orderID to be ${ orderID }, got ${ id }`);
+                                }
+
+                                return renderToOriginal(...args);
+                            });
+                        }));
+                        
+                        renderCardFieldMock({ name: 'card-expiry-field', isFieldValid: () => true, getFieldValue: () => cardExpiry });
+                        setCardFieldsValues({ expiry: cardExpiry });
+                        return expiryFieldToOriginal;
+                        
+                    }));
+
+                    mockFunction(cardFieldInstance, 'CVVField', expect('CVVField', ({ original: CvvFieldToOriginal, args: cvvArgs }) => {
+
+                        const cVVFieldToOriginal = CvvFieldToOriginal(...cvvArgs);
+
+                        mockFunction(cVVFieldToOriginal, 'render', expect('render', async ({ original: renderToOriginal, args }) => {
+                            return props.createOrder().then(id => {
+
+                                if (id !== orderID) {
+                                    throw new Error(`Expected orderID to be ${ orderID }, got ${ id }`);
+                                }
+
+                                return renderToOriginal(...args);
+                            });
+                        }));
+                        
+                        renderCardFieldMock({ name: 'card-cvv-field', isFieldValid: () => true, getFieldValue: () => cardCvv });
+                        setCardFieldsValues({ cvv: cardCvv });
+                        return cVVFieldToOriginal;
+                        
+                    }));
+
+                    mockFunction(props, 'onApprove', expect('onApprove', ({ original: onApproveOriginal, args: [ data, actions ] }) => {
+                        return onApproveOriginal({ ...data, payerID }, actions);
+                    }));
+
                     setTimeout(() => {
-                        cardFieldInstance.submit();
+                        cardFieldInstance.submit().catch(error => {
+                            if (!error) {
+                                throw new Error('Expected on submit error if the card data is invalid');
+                            }
+                        });
                     }, 100);
 
                     return cardFieldInstance;

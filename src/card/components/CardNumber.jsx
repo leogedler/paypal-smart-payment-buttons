@@ -131,28 +131,29 @@ export function CardNumber(
         }
 
         const maskedValue = maskCard(inputValue);
-        const newState = { ...inputState, maskedInputValue: maskedValue };
+        const updatedState = { ...inputState, maskedInputValue: maskedValue };
         if (!isValid) {
-            newState.isPossibleValid = true;
+            updatedState.isPossibleValid = true;
         }
 
-        setInputState({ ...newState });
+        setInputState((newState) => ({ ...newState, ...updatedState }));
     };
 
     const onBlurEvent : (InputEvent) => void = (event : InputEvent) : void => {
-        const newState = { ...inputState };
+        const updatedState = { maskedInputValue, isPossibleValid, contentPasted: false };
 
         if (isValid) {
-            newState.maskedInputValue = maskValidCard(maskedInputValue);
+            updatedState.maskedInputValue = maskValidCard(maskedInputValue);
         } else {
-            newState.isPossibleValid = false;
+            updatedState.isPossibleValid = false;
         }
 
         if (typeof onBlur === 'function') {
             onBlur(event);
         }
 
-        setInputState({ ...newState, contentPasted: false });
+        setInputState((newState) => ({ ...newState, ...updatedState }));
+        
 
     };
 
@@ -163,8 +164,7 @@ export function CardNumber(
     };
 
     const onPasteEvent : (InputEvent) => void = () : void => {
-        const newState = { ...inputState, contentPasted: true };
-        setInputState(newState);
+        setInputState((newState) => ({ ...newState,  contentPasted: true }));
     };
 
     return (
