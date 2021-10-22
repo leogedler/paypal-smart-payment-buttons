@@ -274,7 +274,22 @@ export function checkCVV(value : string, cardType : CardType) : {| isValid : boo
 export function checkExpiry(value : string) : {| isValid : boolean, isPossibleValid : boolean |} {
     let isValid = false;
     if (value.replace(/\s|\//g, '').length === 4) {
-        isValid = true;
+
+        const splittedDate = value.split('/');
+
+        const month = parseInt(splittedDate[0] ? splittedDate[0].trim() : '00', 10);
+        const year =  parseInt(splittedDate[1] ? splittedDate[1].trim() : '00', 10);
+
+        const currentDate = new Date();
+        const currentMonth = currentDate.getMonth() + 1;
+        const currentYear = parseInt(currentDate.getFullYear().toString().slice(-2), 10);
+
+        if (year === currentYear && month >= currentMonth) {
+            isValid = true;
+        } else if (year > currentYear && month >= 1) {
+            isValid = true;
+        }
+
     }
     return {
         isValid,
