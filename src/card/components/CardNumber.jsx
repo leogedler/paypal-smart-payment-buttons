@@ -71,7 +71,7 @@ export function CardNumber(
     const [ cardType, setCardType ] : [ CardType, (CardType) => CardType ] = useState(DEFAULT_CARD_TYPE);
     const [ inputState, setInputState ] : [ InputState, (InputState | InputState => InputState) => InputState ] = useState({ ...defaultInputState, ...state });
 
-    const { inputValue, maskedInputValue, cursorStart, cursorEnd, keyStrokeCount, isValid, isPossibleValid } = inputState;
+    const { inputValue, maskedInputValue, cursorStart, cursorEnd, keyStrokeCount, isValid, isPossibleValid, contentPasted } = inputState;
 
     useEffect(() => {
         const validity = checkCardNumber(inputValue, cardType);
@@ -105,7 +105,10 @@ export function CardNumber(
             endCursorPosition = cursorEnd;
         }
         
-        if (maskedInputValue.length !== maskedValue.length && maskedValue.length === selectionStart + 1) {
+        if (contentPasted) {
+            startCursorPosition = maskedValue.length;
+            endCursorPosition  = maskedValue.length;
+        } else if (maskedInputValue.length !== maskedValue.length && maskedValue.length === selectionStart + 1) {
             startCursorPosition += 1;
             endCursorPosition += 1;
         }
