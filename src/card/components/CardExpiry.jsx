@@ -90,6 +90,7 @@ export function CardExpiry(
             ...inputState,
             inputValue:       rawValue,
             maskedInputValue: mask,
+            contentPasted:    false,
             keyStrokeCount:   keyStrokeCount + 1
         });
 
@@ -125,7 +126,7 @@ export function CardExpiry(
             onBlur(event);
         }
         if (!isValid) {
-            setInputState((newState) => ({ ...newState, isPossibleValid: false }));
+            setInputState((newState) => ({ ...newState, isPossibleValid: false, contentPasted: false }));
         }
     };
 

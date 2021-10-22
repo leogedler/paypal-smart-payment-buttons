@@ -122,6 +122,7 @@ export function CardNumber(
             maskedInputValue: maskedValue,
             cursorStart:      startCursorPosition,
             cursorEnd:        endCursorPosition,
+            contentPasted:    false,
             keyStrokeCount:   keyStrokeCount + 1
         });
 
