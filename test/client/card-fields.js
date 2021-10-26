@@ -189,8 +189,8 @@ describe('card fields cases', () => {
                                 throw new Error(`Expected expiry to be 01/2022 but got ${ data.variables.card.expirationDate }`);
                             }
 
-                            if (data.variables.card.cvv !== '123') {
-                                throw new Error(`Expected CVV to be 123 but got ${ data.variables.card.cvv }`);
+                            if (data.variables.card.securityCode !== '123') {
+                                throw new Error(`Expected CVV to be 123 but got ${ data.variables.card.securityCode }`);
                             }
 
                             return {
@@ -648,8 +648,8 @@ describe('card fields cases', () => {
                                 throw new Error(`Expected expiry to be ${ cardExpiry } but got ${ data.variables.card.expirationDate }`);
                             }
 
-                            if (data.variables.card.cvv !== cardCvv) {
-                                throw new Error(`Expected CVV to be ${ cardCvv } but got ${ data.variables.card.cvv }`);
+                            if (data.variables.card.securityCode !== cardCvv) {
+                                throw new Error(`Expected CVV to be ${ cardCvv } but got ${ data.variables.card.securityCode }`);
                             }
 
                             return {
@@ -833,8 +833,8 @@ describe('card fields cases', () => {
                                 throw new Error(`Expected expiry to be ${ cardExpiry } but got ${ data.variables.card.expirationDate }`);
                             }
 
-                            if (data.variables.card.cvv !== cardCvv) {
-                                throw new Error(`Expected CVV to be ${ cardCvv } but got ${ data.variables.card.cvv }`);
+                            if (data.variables.card.securityCode !== cardCvv) {
+                                throw new Error(`Expected CVV to be ${ cardCvv } but got ${ data.variables.card.securityCode }`);
                             }
 
                             return {
