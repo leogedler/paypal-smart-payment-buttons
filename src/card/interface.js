@@ -109,8 +109,7 @@ export function submitCardFields({ facilitatorAccessToken } : SubmitCardFieldsOp
                 const cardObject = {
                     cardNumber:     card.number,
                     expirationDate: card.expiry,
-                    securityCode:   card.cvv,
-                    postalCode:     '48007'
+                    securityCode:   card.cvv
                 };
 
                 return approveCardPayment({ card: cardObject, orderID, vault, branded, clientID }).catch((error) => {

@@ -3,8 +3,9 @@
 import { camelToDasherize, noop, values } from 'belter';
 import creditCardType from 'credit-card-type';
 import luhn10 from 'card-validator/src/luhn-10';
+import cardValidator from 'card-validator';
 
-import type { CardType, CardNavigation, InputState, FieldValidity, FieldStyle, InputEvent } from '../types';
+import type { CardType, CardNavigation, InputState, FieldValidity, FieldStyle, InputEvent, Card } from '../types';
 import { CARD_ERRORS, FIELD_STYLE, VALIDATOR_TO_TYPE_MAP, DEFAULT_CARD_TYPE } from '../constants';
 import { getActiveElement } from '../../lib/dom';
 
@@ -272,25 +273,9 @@ export function checkCVV(value : string, cardType : CardType) : {| isValid : boo
 }
 
 export function checkExpiry(value : string) : {| isValid : boolean, isPossibleValid : boolean |} {
-    let isValid = false;
-    if (value.replace(/\s|\//g, '').length === 4) {
+    const { expirationDate } = cardValidator;
+    const { isValid } = expirationDate(value);
 
-        const splittedDate = value.split('/');
-
-        const month = parseInt(splittedDate[0] ? splittedDate[0].trim() : '00', 10);
-        const year =  parseInt(splittedDate[1] ? splittedDate[1].trim() : '00', 10);
-
-        const currentDate = new Date();
-        const currentMonth = currentDate.getMonth() + 1;
-        const currentYear = parseInt(currentDate.getFullYear().toString().slice(-2), 10);
-
-        if (year === currentYear && month >= currentMonth) {
-            isValid = true;
-        } else if (year > currentYear && month >= 1) {
-            isValid = true;
-        }
-
-    }
     return {
         isValid,
         isPossibleValid: true
@@ -421,4 +406,17 @@ export function autoFocusOnFirstInput(input? : HTMLInputElement) {
             input.focus();
         }, 1);
     });
+}
+
+// Function that returns the field value in the correct format
+export function formatFieldValue(value : string | Card) : string | Card {
+    let newValue;
+    // Single card field case
+    if (typeof value === 'object') {
+        newValue = { ...value };
+    // Individual field case
+    } else {
+        newValue = value;
+    }
+    return newValue;
 }
