@@ -897,7 +897,8 @@ export function approveCardPayment({ card, orderID, clientID, branded } : Approv
                 )
             }
         `,
-        variables: { orderID, clientID, card, branded }
+        variables:         { orderID, clientID, card, branded },
+        returnErrorObject: true
     }).then((gqlResult) => {
         if (!gqlResult) {
             throw new Error('Error on GraphQL ProcessPayment mutation');

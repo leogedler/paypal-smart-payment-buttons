@@ -11,7 +11,7 @@ import { getLogger } from '../lib';
 
 import { getCardProps } from './props';
 import type { Card } from './types';
-import type { CardExports } from './lib';
+import { type CardExports, parseGQLErrors } from './lib';
 
 function getExportsByFrameName<T>(name : $Values<typeof FRAME_NAME>) : ?CardExports<T> {
     try {
@@ -113,8 +113,9 @@ export function submitCardFields({ facilitatorAccessToken } : SubmitCardFieldsOp
                 };
 
                 return approveCardPayment({ card: cardObject, orderID, vault, branded, clientID }).catch((error) => {
+                    const parsedError = parseGQLErrors(error);
                     getLogger().info('card_fields_payment_failed');
-                    throw error;
+                    throw parsedError;
                 });
             }).then(() => {
                 return onApprove({ payerID: uniqueID() }, { restart });

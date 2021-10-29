@@ -13,6 +13,12 @@ export const CARD_FIELD_TYPE = {
     EXPIRY: 'expiry'
 };
 
+export const GQL_ERRORS = {
+    'Invalid card number':                      ('INVALID_NUMBER' : 'INVALID_NUMBER'),
+    'The card is expired.':                     ('CARD_EXPIRED' : 'CARD_EXPIRED'),
+    'A required field / parameter is missing.': ('MISSING_REQUIRED_PARAMETER' : 'MISSING_REQUIRED_PARAMETER')
+};
+
 export const CARD_ERRORS = {
     INVALID_NUMBER:       ('INVALID_NUMBER' : 'INVALID_NUMBER'),
     INVALID_EXPIRY:       ('INVALID_EXPIRY' : 'INVALID_EXPIRY'),

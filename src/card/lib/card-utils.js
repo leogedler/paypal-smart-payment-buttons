@@ -6,7 +6,7 @@ import luhn10 from 'card-validator/src/luhn-10';
 import cardValidator from 'card-validator';
 
 import type { CardType, CardNavigation, InputState, FieldValidity, FieldStyle, InputEvent, Card } from '../types';
-import { CARD_ERRORS, FIELD_STYLE, VALIDATOR_TO_TYPE_MAP, DEFAULT_CARD_TYPE } from '../constants';
+import { CARD_ERRORS, FIELD_STYLE, VALIDATOR_TO_TYPE_MAP, DEFAULT_CARD_TYPE, GQL_ERRORS } from '../constants';
 import { getActiveElement } from '../../lib/dom';
 
 // Add additional supported card types
@@ -419,4 +419,36 @@ export function formatFieldValue(value : string | Card) : string | Card {
         newValue = value;
     }
     return newValue;
+}
+
+// Parse errors from ProcessPayment GQL mutation
+export function parseGQLErrors(errorsObject : mixed) : {| parsedErrors : $ReadOnlyArray<string>, errors : $ReadOnlyArray<mixed>|} {
+    // $FlowFixMe
+    const { data } = errorsObject;
+
+    const parsedErrors = [];
+    const errors = [];
+
+    if (Array.isArray(data)) {
+        data.forEach(e => {
+            const { details } = e;
+
+            if (Array.isArray(details)) {
+                details.forEach(d => {
+                    errors.push(d);
+
+                    if (d && d.description) {
+                        const parsedError = GQL_ERRORS[d.description] ?? d.description;
+                        parsedErrors.push(parsedError);
+                    }
+                    
+                });
+            }
+        });
+    }
+
+    return {
+        errors,
+        parsedErrors
+    };
 }
