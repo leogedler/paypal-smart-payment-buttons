@@ -165,12 +165,13 @@ export function CardNumberField({ cspNonce, onChange, styleObject = {}, placehol
     const [ generalStyle, inputStyle ] = getStyles(styleObject);
 
     const composedStyles = { ...{ input: DEFAULT_INPUT_STYLE },  ...generalStyle };
+    const { isValid, isPossibleValid } = numberValidity;
 
     useEffect(() => {
         const errors = setErrors({ isNumberValid: numberValidity.isValid });
 
         onChange({ value: number, valid: numberValidity.isValid, errors });
-    }, [ number, numberValidity ]);
+    }, [ number, isValid, isPossibleValid ]);
 
     return (
         <Fragment>
@@ -206,12 +207,13 @@ export function CardExpiryField({ cspNonce, onChange, styleObject = {}, placehol
     const [ generalStyle, inputStyle ] = getStyles(styleObject);
 
     const composedStyles = { ...{ input: DEFAULT_INPUT_STYLE },  ...generalStyle };
+    const { isValid, isPossibleValid } = expiryValidity;
 
     useEffect(() => {
         const errors = setErrors({ isExpiryValid: expiryValidity.isValid });
 
         onChange({ value: expiry, valid: expiryValidity.isValid, errors });
-    }, [ expiry, expiryValidity ]);
+    }, [ expiry, isValid, isPossibleValid ]);
 
     return (
         <Fragment>
@@ -246,12 +248,13 @@ export function CardCVVField({ cspNonce, onChange, styleObject = {}, placeholder
     const [ generalStyle, inputStyle ] = getStyles(styleObject);
     
     const composedStyles = { ...{ input: DEFAULT_INPUT_STYLE },  ...generalStyle };
+    const { isValid, isPossibleValid } = cvvValidity;
 
     useEffect(() => {
         const errors = setErrors({ isCvvValid: cvvValidity.isValid });
 
         onChange({ value: cvv, valid: cvvValidity.isValid, errors });
-    }, [ cvv, cvvValidity ]);
+    }, [ cvv, isValid, isPossibleValid  ]);
 
     return (
         <Fragment>
