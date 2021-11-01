@@ -156,16 +156,22 @@ type CardNumberFieldProps = {|
     cspNonce : string,
     onChange : ({| value : string, valid : boolean, errors : [$Values<typeof CARD_ERRORS>] | [] |}) => void,
     styleObject : CardStyle,
-   placeholder : {| number? : string, expiry? : string, cvv? : string  |}
+    placeholder : {| number? : string, expiry? : string, cvv? : string  |},
+    autoFocusRef : (mixed) => void
 |};
 
-export function CardNumberField({ cspNonce, onChange, styleObject = {}, placeholder = {} } : CardNumberFieldProps) : mixed {
+export function CardNumberField({ cspNonce, onChange, styleObject = {}, placeholder = {}, autoFocusRef } : CardNumberFieldProps) : mixed {
     const [ number, setNumber ] : [ string, (string) => string ] = useState('');
     const [ numberValidity, setNumberValidity ] : [ FieldValidity, (FieldValidity) => FieldValidity ] = useState(initFieldValidity);
     const [ generalStyle, inputStyle ] = getStyles(styleObject);
+    const numberRef = useRef();
 
     const composedStyles = { ...{ input: DEFAULT_INPUT_STYLE },  ...generalStyle };
     const { isValid, isPossibleValid } = numberValidity;
+
+    useEffect(() => {
+        autoFocusRef(numberRef);
+    }, []);
 
     useEffect(() => {
         const errors = setErrors({ isNumberValid: numberValidity.isValid });
@@ -180,6 +186,7 @@ export function CardNumberField({ cspNonce, onChange, styleObject = {}, placehol
             </style>
 
             <CardNumber
+                ref={ numberRef }
                 type='text'
                 // eslint-disable-next-line react/forbid-component-props
                 className={ `number ${ numberValidity.isPossibleValid ? 'valid' : 'invalid' }` }
@@ -198,17 +205,23 @@ type CardExpiryFieldProps = {|
     cspNonce : string,
     onChange : ({| value : string, valid : boolean, errors : [$Values<typeof CARD_ERRORS>] | [] |}) => void,
     styleObject : CardStyle,
-    placeholder : {| number? : string, expiry? : string, cvv? : string  |}
+    placeholder : {| number? : string, expiry? : string, cvv? : string  |},
+    autoFocusRef : (mixed) => void
 |};
 
-export function CardExpiryField({ cspNonce, onChange, styleObject = {}, placeholder = {} } : CardExpiryFieldProps) : mixed {
+export function CardExpiryField({ cspNonce, onChange, styleObject = {}, placeholder = {}, autoFocusRef } : CardExpiryFieldProps) : mixed {
     const [ expiry, setExpiry ] : [ string, (string) => string ] = useState('');
     const [ expiryValidity, setExpiryValidity ] : [ FieldValidity, (FieldValidity) => FieldValidity ] = useState(initFieldValidity);
     const [ generalStyle, inputStyle ] = getStyles(styleObject);
+    const expiryRef = useRef();
 
     const composedStyles = { ...{ input: DEFAULT_INPUT_STYLE },  ...generalStyle };
     const { isValid, isPossibleValid } = expiryValidity;
 
+    useEffect(() => {
+        autoFocusRef(expiryRef);
+    }, []);
+    
     useEffect(() => {
         const errors = setErrors({ isExpiryValid: expiryValidity.isValid });
 
@@ -222,6 +235,7 @@ export function CardExpiryField({ cspNonce, onChange, styleObject = {}, placehol
             </style>
 
             <CardExpiry
+                ref={ expiryRef }
                 type='text'
                 // eslint-disable-next-line react/forbid-component-props
                 className={ `expiry ${ expiryValidity.isPossibleValid || expiryValidity.isValid ? 'valid' : 'invalid' }` }
@@ -239,16 +253,22 @@ type CardCvvFieldProps = {|
     cspNonce : string,
     onChange : ({| value : string, valid : boolean, errors : [$Values<typeof CARD_ERRORS>] | [] |}) => void,
     styleObject : CardStyle,
-    placeholder : {| number? : string, expiry? : string, cvv? : string  |}
+    placeholder : {| number? : string, expiry? : string, cvv? : string  |},
+    autoFocusRef : (mixed) => void
 |};
 
-export function CardCVVField({ cspNonce, onChange, styleObject = {}, placeholder = {} } : CardCvvFieldProps) : mixed {
+export function CardCVVField({ cspNonce, onChange, styleObject = {}, placeholder = {}, autoFocusRef } : CardCvvFieldProps) : mixed {
     const [ cvv, setCvv ] : [ string, (string) => string ] = useState('');
     const [ cvvValidity, setCvvValidity ] : [ FieldValidity, (FieldValidity) => FieldValidity ] = useState(initFieldValidity);
     const [ generalStyle, inputStyle ] = getStyles(styleObject);
+    const cvvRef = useRef();
     
     const composedStyles = { ...{ input: DEFAULT_INPUT_STYLE },  ...generalStyle };
     const { isValid, isPossibleValid } = cvvValidity;
+
+    useEffect(() => {
+        autoFocusRef(cvvRef);
+    }, []);
 
     useEffect(() => {
         const errors = setErrors({ isCvvValid: cvvValidity.isValid });
@@ -263,6 +283,7 @@ export function CardCVVField({ cspNonce, onChange, styleObject = {}, placeholder
             </style>
 
             <CardCVV
+                ref={ cvvRef }
                 type='text'
                 // eslint-disable-next-line react/forbid-component-props
                 className={ `cvv ${ cvvValidity.isPossibleValid || cvvValidity.isValid ? 'valid' : 'invalid' }` }

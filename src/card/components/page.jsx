@@ -109,30 +109,36 @@ function Page({ cspNonce, props } : PageProps) : mixed {
             {
                 (type === CARD_FIELD_TYPE.NUMBER)
                     ? <CardNumberField
+                        ref={ mainRef }
                         cspNonce={ cspNonce }
                         onChange={ onFieldChange }
                         styleObject={ style }
                         placeholder={ placeholder }
+                        autoFocusRef={ (ref) => setRef(ref.current.base) }
                     /> : null
             }
 
             {
                 (type === CARD_FIELD_TYPE.CVV)
                     ? <CardCVVField
+                        ref={ mainRef }
                         cspNonce={ cspNonce }
                         onChange={ onFieldChange }
                         styleObject={ style }
                         placeholder={ placeholder }
+                        autoFocusRef={ (ref) => setRef(ref.current.base) }
                     /> : null
             }
 
             {
                 (type === CARD_FIELD_TYPE.EXPIRY)
                     ? <CardExpiryField
+                        ref={ mainRef }
                         cspNonce={ cspNonce }
                         onChange={ onFieldChange }
                         styleObject={ style }
                         placeholder={ placeholder }
+                        autoFocusRef={ (ref) => setRef(ref.current.base) }
                     /> : null
             }
         </Fragment>
