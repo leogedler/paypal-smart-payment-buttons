@@ -14,9 +14,16 @@ export const CARD_FIELD_TYPE = {
 };
 
 export const GQL_ERRORS = {
-    'Invalid card number':                      ('INVALID_NUMBER' : 'INVALID_NUMBER'),
-    'The card is expired.':                     ('CARD_EXPIRED' : 'CARD_EXPIRED'),
-    'A required field / parameter is missing.': ('MISSING_REQUIRED_PARAMETER' : 'MISSING_REQUIRED_PARAMETER')
+    '/payment_source/card/number': {
+        'VALIDATION_ERROR':           ('INVALID_NUMBER' : 'INVALID_NUMBER'),
+        'MISSING_REQUIRED_PARAMETER': ('MISSING_NUMBER' : 'MISSING_NUMBER')
+    },
+    '/payment_source/card/expiry': {
+        'INVALID_PARAMETER_SYNTAX':   ('INVALID_EXPIRATION_DATE_FORMAT' : 'INVALID_EXPIRATION_DATE_FORMAT'),
+        'INVALID_STRING_LENGTH':      ('INVALID_EXPIRATION_DATE_LENGTH' : 'INVALID_EXPIRATION_DATE_LENGTH'),
+        'CARD_EXPIRED':               ('CARD_EXPIRED' : 'CARD_EXPIRED'),
+        'MISSING_REQUIRED_PARAMETER': ('MISSING_EXPIRATION_DATE' : 'MISSING_EXPIRATION_DATE')
+    }
 };
 
 export const CARD_ERRORS = {

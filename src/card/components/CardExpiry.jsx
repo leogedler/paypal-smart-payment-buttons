@@ -5,7 +5,7 @@ import { h } from 'preact';
 import { useState, useEffect } from 'preact/hooks';
 
 import {
-    maskDate,
+    formatDate,
     checkExpiry,
     removeNonDigits,
     removeDateMask,
@@ -74,7 +74,7 @@ export function CardExpiry(
     const setDateMask : (InputEvent) => void = (event : InputEvent) : void => {
         const { value : rawValue, selectionStart, selectionEnd } = event.target;
         const value = removeNonDigits(rawValue);
-        const mask = maskDate(value, rawValue);
+        const mask = formatDate(value, rawValue);
 
         let startCursorPosition = selectionStart;
         let endCursorPosition = selectionEnd;

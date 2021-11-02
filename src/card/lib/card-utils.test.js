@@ -2,7 +2,7 @@
 
 import { getActiveElement } from '../../lib/dom';
 
-import { autoFocusOnFirstInput, maskValidCard, maskDate } from './card-utils';
+import { autoFocusOnFirstInput, maskValidCard, formatDate } from './card-utils';
 
 jest.mock('../../lib/dom');
 
@@ -129,33 +129,33 @@ describe('card utils', () => {
         });
     });
 
-    describe('maskDate', () => {
-        it('masks valid number sequence to a valid format', () => {
-            const masked = maskDate('1022');
+    describe('formatDate', () => {
+        it('format valid number sequence', () => {
+            const masked = formatDate('1022');
 
             expect(masked).toBe('10 / 22');
         });
 
         it('add slash at the end of a valid month', () => {
-            const masked = maskDate('10');
+            const masked = formatDate('10');
 
             expect(masked).toBe('10 / ');
         });
 
         it('format number adding slash to separate month section from year section', () => {
-            const masked = maskDate('22');
+            const masked = formatDate('22');
 
             expect(masked).toBe('02 / 2');
         });
 
         it('returns prevMask if it is possible valid', () => {
-            const masked = maskDate('22');
+            const masked = formatDate('22');
 
             expect(masked).toBe('02 / 2');
         });
 
         it('returns only the month section when the string finished with slash', () => {
-            const masked = maskDate('12 /');
+            const masked = formatDate('12 /');
 
             expect(masked).toBe('12');
         });

@@ -145,14 +145,14 @@ export function removeDateMask(date : string) : string {
 }
 
 
-// Mask date
-export function maskDate(date : string, prevMask? : string = '') : string {
+// Format expiry date
+export function formatDate(date : string, prevFormat? : string = '') : string {
     assertString(date);
 
-    if (prevMask && prevMask.indexOf('/') > -1) {
-        const [ month ] = removeSpaces(prevMask).split('/');
+    if (prevFormat && prevFormat.indexOf('/') > -1) {
+        const [ month ] = removeSpaces(prevFormat).split('/');
         if (month.length < 2) {
-            return prevMask;
+            return prevFormat;
         }
     }
 
@@ -437,8 +437,8 @@ export function parseGQLErrors(errorsObject : mixed) : {| parsedErrors : $ReadOn
                 details.forEach(d => {
                     errors.push(d);
 
-                    if (d && d.description) {
-                        const parsedError = GQL_ERRORS[d.description] ?? d.description;
+                    if (d && d.field && d.issue && d.description) {
+                        const parsedError = GQL_ERRORS[d.field][d.issue] ?? `${ d.issue }: ${ d.description }`;
                         parsedErrors.push(parsedError);
                     }
                     
