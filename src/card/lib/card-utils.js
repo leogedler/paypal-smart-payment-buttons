@@ -182,14 +182,13 @@ export function formatDate(date : string, prevFormat? : string = '') : string {
 
 }
 
-
-// $FlowFixMe
-export function filterStyles(rawStyles : {| |} = {}) : FieldStyle {
+// Removed invalid and/or unsupported style props
+export function filterStyles(rawStyles : Object = {}) : FieldStyle {
     const camelKey = Object.keys(FIELD_STYLE);
     const dashKey = values(FIELD_STYLE);
 
     // $FlowFixMe
-    return Object.keys(rawStyles).reduce((acc : {|  |}, key : string) => {
+    return Object.keys(rawStyles).reduce((acc : Object, key : string) => {
         if (typeof rawStyles[key] === 'object') {
             acc[key] = rawStyles[key];
         } else if (camelKey.indexOf(key) > -1 || dashKey.indexOf(key) > -1) {
@@ -200,16 +199,16 @@ export function filterStyles(rawStyles : {| |} = {}) : FieldStyle {
 
 }
 
-// eslint-disable-next-line flowtype/require-exact-type
-export function styleToString(style : {  } = { }) : string {
-    // $FlowFixMe
+// Converts style object to valid style string
+export function styleToString(style : Object = { }) : string {
     const filteredStyles = filterStyles(style);
     return Object.keys(filteredStyles).reduce((acc : string, key : string) => (
         `${ acc }  ${ camelToDasherize(key) } ${ typeof style[key] === 'object' ? `{ ${ styleToString(style[key]) } }` : `: ${ style[key] } ;` }`
     ), '');
 }
 
-export function getStyles(style : {| |}) : [mixed, mixed] {
+// Destructures nested style objects
+export function getStyles(style : Object) : [Object, Object] {
     // $FlowFixMe
     return Object.keys(style).reduce((acc : [{| |}, {| |}], key : string) => {
         if (typeof style[key] === 'object') {
@@ -422,8 +421,7 @@ export function formatFieldValue(value : string | Card) : string | Card {
 }
 
 // Parse errors from ProcessPayment GQL mutation
-export function parseGQLErrors(errorsObject : mixed) : {| parsedErrors : $ReadOnlyArray<string>, errors : $ReadOnlyArray<mixed>|} {
-    // $FlowFixMe
+export function parseGQLErrors(errorsObject : Object) : {| parsedErrors : $ReadOnlyArray<string>, errors : $ReadOnlyArray<Object>|} {
     const { data } = errorsObject;
 
     const parsedErrors = [];
