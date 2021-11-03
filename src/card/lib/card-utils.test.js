@@ -297,7 +297,34 @@ describe('card utils', () => {
             expect(errors[0]?.issue).toBe('MISSING_REQUIRED_PARAMETER');
         });
 
-        it('should return only unparsed errors for unhandled cases', () => {
+        it('should parse refused transaction error', () => {
+            const gqlError = {
+                path:    [
+                    'processPayment'
+                ],
+                data: [
+                    {
+                        code:    'UNPROCESSABLE_ENTITY',
+                        details: [
+                            {
+                                issue:       'TRANSACTION_REFUSED',
+                                description: 'The request was refused.'
+                            }
+                        ]
+                    }
+                ]
+            };
+
+            const { parsedErrors, errors } = parseGQLErrors(gqlError);
+
+            expect(parsedErrors.length).toBe(1);
+            expect(parsedErrors[0]).toBe('TRANSACTION_REJECTED');
+
+            expect(errors.length).toBe(1);
+            expect(errors[0]?.issue).toBe('TRANSACTION_REFUSED');
+        });
+
+        it('should return errors for unhandled (not defined on the constants) cases', () => {
             const gqlError = {
                 path:    [
                     'processPayment'
@@ -317,7 +344,8 @@ describe('card utils', () => {
 
             const { parsedErrors, errors } = parseGQLErrors(gqlError);
 
-            expect(parsedErrors.length).toBe(0);
+            expect(parsedErrors.length).toBe(1);
+            expect(parsedErrors[0]).toBe('PERMISSION_DENIED: You do not have permission to access or perform operations on this resource.');
 
             expect(errors.length).toBe(1);
             expect(errors[0]?.issue).toBe('PERMISSION_DENIED');

@@ -427,16 +427,22 @@ export function parseGQLErrors(errorsObject : Object) : {| parsedErrors : $ReadO
     const parsedErrors = [];
     const errors = [];
 
-    if (Array.isArray(data)) {
+    if (Array.isArray(data) && data.length) {
         data.forEach(e => {
             const { details } = e;
 
-            if (Array.isArray(details)) {
+            if (Array.isArray(details) && details.length) {
                 details.forEach(d => {
                     errors.push(d);
-
-                    if (d && d.field && d.issue && d.description) {
-                        const parsedError = GQL_ERRORS[d.field][d.issue] ?? `${ d.issue }: ${ d.description }`;
+                    
+                    let parsedError;
+                    if (d.field && d.issue && d.description) {
+                        parsedError = GQL_ERRORS[d.field][d.issue] ?? `${ d.issue }: ${ d.description }`;
+                    } else if (d.issue && d.description) {
+                        parsedError = GQL_ERRORS[d.issue] ?? `${ d.issue }: ${ d.description }`;
+                    }
+                    
+                    if (parsedError) {
                         parsedErrors.push(parsedError);
                     }
                     
