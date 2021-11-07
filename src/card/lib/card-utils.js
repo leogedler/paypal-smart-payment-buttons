@@ -6,7 +6,7 @@ import luhn10 from 'card-validator/src/luhn-10';
 import cardValidator from 'card-validator';
 
 import type { CardType, CardNavigation, InputState, FieldValidity, FieldStyle, InputEvent, Card } from '../types';
-import { CARD_ERRORS, FIELD_STYLE, VALIDATOR_TO_TYPE_MAP, DEFAULT_CARD_TYPE, GQL_ERRORS } from '../constants';
+import { CARD_ERRORS, FIELD_STYLE, VALIDATOR_TO_TYPE_MAP, DEFAULT_CARD_TYPE, GQL_ERRORS, CARD_FIELD_TYPE } from '../constants';
 import { getActiveElement } from '../../lib/dom';
 
 // Add additional supported card types
@@ -281,19 +281,37 @@ export function checkExpiry(value : string) : {| isValid : boolean, isPossibleVa
     };
 }
 
-export function setErrors({ isNumberValid, isCvvValid, isExpiryValid } : {| isNumberValid? : boolean, isCvvValid? : boolean, isExpiryValid? : boolean |}) : [$Values<typeof CARD_ERRORS>] | [] {
+export function setErrors({ isNumberValid, isCvvValid, isExpiryValid, gqlErrorsObject = {} } : {| isNumberValid? : boolean, isCvvValid? : boolean, isExpiryValid? : boolean, gqlErrorsObject? : {| field : string, errors : [] |} |}) : [$Values<typeof CARD_ERRORS>] | [] {
     const errors = [];
 
+    const { field, errors: gqlErrors } = gqlErrorsObject;
+
     if (typeof isNumberValid === 'boolean' && !isNumberValid) {
-        errors.push(CARD_ERRORS.INVALID_NUMBER);
+
+        if (field === CARD_FIELD_TYPE.NUMBER  && gqlErrors.length) {
+            errors.push(...gqlErrors);
+        } else {
+            errors.push(CARD_ERRORS.INVALID_NUMBER);
+        }
     }
 
     if (typeof isExpiryValid === 'boolean' && !isExpiryValid) {
-        errors.push(CARD_ERRORS.INVALID_EXPIRY);
+
+        if (field === CARD_FIELD_TYPE.EXPIRY  && gqlErrors.length) {
+            errors.push(...gqlErrors);
+        } else {
+            errors.push(CARD_ERRORS.INVALID_EXPIRY);
+        }
+
     }
 
     if (typeof isCvvValid === 'boolean' &&  !isCvvValid) {
-        errors.push(CARD_ERRORS.INVALID_CVV);
+
+        if (field === CARD_FIELD_TYPE.CVV  && gqlErrors.length) {
+            errors.push(...gqlErrors);
+        } else {
+            errors.push(CARD_ERRORS.INVALID_CVV);
+        }
     }
 
     return errors;
@@ -421,11 +439,12 @@ export function formatFieldValue(value : string | Card) : string | Card {
 }
 
 // Parse errors from ProcessPayment GQL mutation
-export function parseGQLErrors(errorsObject : Object) : {| parsedErrors : $ReadOnlyArray<string>, errors : $ReadOnlyArray<Object>|} {
+export function parseGQLErrors(errorsObject : Object) : {| parsedErrors : $ReadOnlyArray<string>, errors : $ReadOnlyArray<Object>, mapErrors : Object |} {
     const { data } = errorsObject;
 
     const parsedErrors = [];
     const errors = [];
+    const mapErrors = {};
 
     if (Array.isArray(data) && data.length) {
         data.forEach(e => {
@@ -438,6 +457,14 @@ export function parseGQLErrors(errorsObject : Object) : {| parsedErrors : $ReadO
                     let parsedError;
                     if (d.field && d.issue && d.description) {
                         parsedError = GQL_ERRORS[d.field][d.issue] ?? `${ d.issue }: ${ d.description }`;
+                        const field  = d.field.split('/').pop();
+
+                        if (!mapErrors[field]) {
+                            mapErrors[field] = [];
+                        }
+                        
+                        mapErrors[field].push(parsedError);
+
                     } else if (d.issue && d.description) {
                         parsedError = GQL_ERRORS[d.issue] ?? `${ d.issue }: ${ d.description }`;
                     }
@@ -453,6 +480,7 @@ export function parseGQLErrors(errorsObject : Object) : {| parsedErrors : $ReadO
 
     return {
         errors,
-        parsedErrors
+        parsedErrors,
+        mapErrors
     };
 }

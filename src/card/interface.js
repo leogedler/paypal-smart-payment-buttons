@@ -11,7 +11,7 @@ import { getLogger } from '../lib';
 
 import { getCardProps } from './props';
 import type { Card } from './types';
-import { type CardExports, parseGQLErrors } from './lib';
+import { type CardExports, type ExportsOptions, parseGQLErrors } from './lib';
 
 function getExportsByFrameName<T>(name : $Values<typeof FRAME_NAME>) : ?CardExports<T> {
     try {
@@ -31,16 +31,31 @@ function getExportsByFrameName<T>(name : $Values<typeof FRAME_NAME>) : ?CardExpo
     }
 }
 
-export function hasCardFields() : boolean {
+
+function getCardFrames() : {| cardFrame : ?ExportsOptions,  cardNumberFrame : ?ExportsOptions, cardCVVFrame : ?ExportsOptions, cardExpiryFrame : ?ExportsOptions |} {
+
     const cardFrame = getExportsByFrameName(FRAME_NAME.CARD_FIELD);
+    const cardNumberFrame = getExportsByFrameName(FRAME_NAME.CARD_NUMBER_FIELD);
+    const cardCVVFrame = getExportsByFrameName(FRAME_NAME.CARD_CVV_FIELD);
+    const cardExpiryFrame = getExportsByFrameName(FRAME_NAME.CARD_EXPIRY_FIELD);
+
+    return {
+        cardFrame,
+        cardNumberFrame,
+        cardCVVFrame,
+        cardExpiryFrame
+    };
+}
+
+
+export function hasCardFields() : boolean {
+    const { cardFrame } = getCardFrames();
 
     if (cardFrame) {
         return true;
     }
 
-    const cardNumberFrame = getExportsByFrameName(FRAME_NAME.CARD_NUMBER_FIELD);
-    const cardCVVFrame = getExportsByFrameName(FRAME_NAME.CARD_CVV_FIELD);
-    const cardExpiryFrame = getExportsByFrameName(FRAME_NAME.CARD_EXPIRY_FIELD);
+    const { cardNumberFrame, cardCVVFrame, cardExpiryFrame } = getCardFrames();
 
     if (cardNumberFrame && cardCVVFrame && cardExpiryFrame) {
         return true;
@@ -56,9 +71,7 @@ export function getCardFields() : ?Card {
         return cardFrame.getFieldValue();
     }
 
-    const cardNumberFrame = getExportsByFrameName(FRAME_NAME.CARD_NUMBER_FIELD);
-    const cardCVVFrame = getExportsByFrameName(FRAME_NAME.CARD_CVV_FIELD);
-    const cardExpiryFrame = getExportsByFrameName(FRAME_NAME.CARD_EXPIRY_FIELD);
+    const { cardNumberFrame, cardCVVFrame, cardExpiryFrame } = getCardFrames();
 
     if (
         cardNumberFrame && cardNumberFrame.isFieldValid() &&
@@ -75,12 +88,69 @@ export function getCardFields() : ?Card {
     throw new Error(`Card fields not available to submit`);
 }
 
+export function emitGqlErrors(mapErrors : Object) : void {
+    const { cardFrame, cardNumberFrame, cardExpiryFrame, cardCVVFrame } = getCardFrames();
+
+    const { number, expiry, security_code } = mapErrors;
+
+    if (cardFrame) {
+        let cardFieldError = { field: '', errors: [] };
+        if (number) {
+            cardFieldError = { field: 'number', errors: number };
+        }
+
+        if (expiry) {
+            cardFieldError = { field: 'expiry', errors: expiry };
+        }
+
+        if (security_code) {
+            cardFieldError = { field: 'cvv', errors: security_code };
+        }
+
+        cardFrame.setGqlErrors(cardFieldError);
+    }
+
+    if (cardNumberFrame) {
+        cardNumberFrame.setGqlErrors({ field: 'number', errors: number });
+    }
+
+    if (cardExpiryFrame) {
+        cardExpiryFrame.setGqlErrors({ field: 'expiry', errors: expiry });
+    }
+
+    if (cardCVVFrame) {
+        cardCVVFrame.setGqlErrors({ field: 'cvv', errors: security_code });
+    }
+}
+
+export function cleanGqlErrors() : void {
+    const { cardFrame, cardNumberFrame, cardExpiryFrame, cardCVVFrame } = getCardFrames();
+
+    if (cardFrame) {
+        cardFrame.cleanGqlErrors();
+    }
+
+    if (cardNumberFrame) {
+        cardNumberFrame.cleanGqlErrors();
+    }
+
+    if (cardExpiryFrame) {
+        cardExpiryFrame.cleanGqlErrors();
+    }
+
+    if (cardCVVFrame) {
+        cardCVVFrame.cleanGqlErrors();
+    }
+}
+
 type SubmitCardFieldsOptions = {|
     facilitatorAccessToken : string
 |};
 
 export function submitCardFields({ facilitatorAccessToken } : SubmitCardFieldsOptions) : ZalgoPromise<void> {
     const { intent, branded, vault, createOrder, onApprove, clientID } = getCardProps({ facilitatorAccessToken });
+
+    cleanGqlErrors();
 
     return ZalgoPromise.try(() => {
         if (!hasCardFields()) {
@@ -113,12 +183,21 @@ export function submitCardFields({ facilitatorAccessToken } : SubmitCardFieldsOp
                 };
 
                 return approveCardPayment({ card: cardObject, orderID, vault, branded, clientID }).catch((error) => {
-                    const parsedError = parseGQLErrors(error);
+
+                    const { mapErrors, parsedErrors, errors } = parseGQLErrors(error);
+
+                    if (mapErrors) {
+                        emitGqlErrors(mapErrors);
+                    }
+
                     getLogger().info('card_fields_payment_failed');
-                    throw parsedError;
+
+                    const errorObject = { parsedErrors, errors };
+
+                    throw errorObject;
                 });
             }).then(() => {
-                return onApprove({ payerID: uniqueID() }, { restart });
+                return onApprove({ payerID: uniqueID(), buyerAccessToken: uniqueID() }, { restart });
             });
         }
     });

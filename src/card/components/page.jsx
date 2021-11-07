@@ -26,6 +26,7 @@ function Page({ cspNonce, props } : PageProps) : mixed {
     const [ fieldErrors, setFieldErrors ] = useState([]);
     const [ mainRef, setRef ] = useState();
 
+    const [ fieldGQLErrors, setFieldGQLErrors ] = useState({ singleField: {}, numberField: [], expiryField: [], cvvField: [] });
 
     const getFieldValue = () => {
         return fieldValue;
@@ -33,6 +34,34 @@ function Page({ cspNonce, props } : PageProps) : mixed {
 
     const isFieldValid = () => {
         return fieldValid;
+    };
+
+    const setGqlErrors = (errorData : {| field : string, errors : [] |}) => {
+        const { errors } = errorData;
+
+        const errorObject = { ...fieldGQLErrors };
+
+        if (type === CARD_FIELD_TYPE.SINGLE) {
+            errorObject.singleField = { ...errorData };
+        }
+
+        if (type === CARD_FIELD_TYPE.NUMBER) {
+            errorObject.numberField = [ ...errors ];
+        }
+
+        if (type === CARD_FIELD_TYPE.EXPIRY) {
+            errorObject.expiryField = [ ...errors ];
+        }
+
+        if (type === CARD_FIELD_TYPE.CVV) {
+            errorObject.cvvField = [ ...errors ];
+        }
+
+        setFieldGQLErrors(errorObject);
+    };
+
+    const cleanGqlErrors = () => {
+        setFieldGQLErrors({ singleField: {}, numberField: [], expiryField: [], cvvField: [] });
     };
 
     useEffect(() => {
@@ -50,7 +79,9 @@ function Page({ cspNonce, props } : PageProps) : mixed {
         setupExports({
             name: CARD_FIELD_TYPE_TO_FRAME_NAME[type],
             isFieldValid,
-            getFieldValue
+            getFieldValue,
+            setGqlErrors,
+            cleanGqlErrors
         });
 
         xport({
@@ -66,6 +97,7 @@ function Page({ cspNonce, props } : PageProps) : mixed {
         setFieldValue(newValue);
         setFieldErrors([ ...errors ]);
         setFieldValid(valid);
+        cleanGqlErrors();
     };
 
     return (
@@ -98,6 +130,7 @@ function Page({ cspNonce, props } : PageProps) : mixed {
             {
                 (type === CARD_FIELD_TYPE.SINGLE)
                     ? <CardField
+                        gqlErrorsObject={ fieldGQLErrors.singleField }
                         cspNonce={ cspNonce }
                         onChange={ onFieldChange }
                         styleObject={ style }
@@ -110,6 +143,7 @@ function Page({ cspNonce, props } : PageProps) : mixed {
                 (type === CARD_FIELD_TYPE.NUMBER)
                     ? <CardNumberField
                         ref={ mainRef }
+                        gqlErrors={ fieldGQLErrors.numberField }
                         cspNonce={ cspNonce }
                         onChange={ onFieldChange }
                         styleObject={ style }

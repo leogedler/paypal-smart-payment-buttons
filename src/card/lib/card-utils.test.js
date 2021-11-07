@@ -190,13 +190,16 @@ describe('card utils', () => {
                 ]
             };
 
-            const { parsedErrors, errors } = parseGQLErrors(gqlError);
+            const { parsedErrors, errors, mapErrors } = parseGQLErrors(gqlError);
 
             expect(parsedErrors.length).toBe(1);
             expect(parsedErrors[0]).toBe('INVALID_NUMBER');
 
             expect(errors.length).toBe(1);
             expect(errors[0]?.issue).toBe('VALIDATION_ERROR');
+
+            expect(mapErrors.number).not.toEqual(undefined);
+            expect(mapErrors.number.length).toBe(1);
         });
 
         it('should parse an invalid expity syntax error', () => {
@@ -227,7 +230,7 @@ describe('card utils', () => {
                 ]
             };
 
-            const { parsedErrors, errors } = parseGQLErrors(gqlError);
+            const { parsedErrors, errors, mapErrors } = parseGQLErrors(gqlError);
 
             expect(parsedErrors.length).toBe(2);
             expect(parsedErrors[0]).toBe('INVALID_EXPIRATION_DATE_FORMAT');
@@ -236,6 +239,9 @@ describe('card utils', () => {
             expect(errors.length).toBe(2);
             expect(errors[0]?.issue).toBe('INVALID_PARAMETER_SYNTAX');
             expect(errors[1]?.issue).toBe('INVALID_STRING_LENGTH');
+
+            expect(mapErrors.expiry).not.toEqual(undefined);
+            expect(mapErrors.expiry.length).toBe(2);
         });
 
         it('should parse an expired card error', () => {
@@ -258,13 +264,16 @@ describe('card utils', () => {
                 ]
             };
 
-            const { parsedErrors, errors } = parseGQLErrors(gqlError);
+            const { parsedErrors, errors, mapErrors } = parseGQLErrors(gqlError);
 
             expect(parsedErrors.length).toBe(1);
             expect(parsedErrors[0]).toBe('CARD_EXPIRED');
 
             expect(errors.length).toBe(1);
             expect(errors[0]?.issue).toBe('CARD_EXPIRED');
+
+            expect(mapErrors.expiry).not.toEqual(undefined);
+            expect(mapErrors.expiry.length).toBe(1);
         });
 
         it('should parse a missing required field error', () => {

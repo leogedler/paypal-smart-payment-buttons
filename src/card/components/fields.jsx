@@ -30,7 +30,8 @@ import {
     DEFAULT_STYLE,
     DEFAULT_CARD_TYPE,
     DEFAULT_INPUT_STYLE,
-    DEFAULT_PLACEHOLDERS
+    DEFAULT_PLACEHOLDERS,
+    CARD_FIELD_TYPE
 } from '../constants';
 
 import { CardNumber } from './CardNumber';
@@ -43,10 +44,11 @@ type CardFieldProps = {|
     onChange : ({| value : Card, valid : boolean, errors : [$Values<typeof CARD_ERRORS>] | [] |}) => void,
     styleObject : CardStyle,
     placeholder : {| number? : string, expiry? : string, cvv? : string  |},
-    autoFocusRef : (mixed) => void
+    autoFocusRef : (mixed) => void,
+    gqlErrorsObject : {| field : string, errors : [] |}
 |};
 
-export function CardField({ cspNonce, onChange, styleObject = {}, placeholder = {}, autoFocusRef } : CardFieldProps) : mixed {
+export function CardField({ cspNonce, onChange, styleObject = {}, placeholder = {}, gqlErrorsObject = {}, autoFocusRef } : CardFieldProps) : mixed {
     const [ number, setNumber ] : [ string, (string) => string ] = useState('');
     const [ cvv, setCvv ] : [ string, (string) => string ] = useState('');
     const [ expiry, setExpiry ] : [ string, (string) => string ] = useState('');
@@ -70,6 +72,32 @@ export function CardField({ cspNonce, onChange, styleObject = {}, placeholder = 
     useEffect(() => {
         autoFocusRef(numberRef);
     }, []);
+
+    useEffect(() => {
+        const { field, errors } = gqlErrorsObject;
+
+        if (field === CARD_FIELD_TYPE.NUMBER) {
+            const hasQQLErros = errors.length > 0;
+            if (hasQQLErros) {
+                setNumberValidity({ isPossibleValid: false, isValid: false });
+            }
+        }
+
+        if (field === CARD_FIELD_TYPE.EXPIRY) {
+            const hasQQLErros = errors.length > 0;
+            if (hasQQLErros) {
+                setExpiryValidity({ isPossibleValid: false, isValid: false });
+            }
+        }
+
+        if (field === CARD_FIELD_TYPE.CVV) {
+            const hasQQLErros = errors.length > 0;
+            if (hasQQLErros) {
+                setCvvValidity({ isPossibleValid: false, isValid: false });
+            }
+        }
+
+    }, [ gqlErrorsObject ]);
    
     useEffect(() => {
 
@@ -77,7 +105,7 @@ export function CardField({ cspNonce, onChange, styleObject = {}, placeholder = 
 
         setIsValid(valid);
 
-        const errors = setErrors({ isNumberValid: numberValidity.isValid, isCvvValid: cvvValidity.isValid, isExpiryValid: expiryValidity.isValid });
+        const errors = setErrors({ isNumberValid: numberValidity.isValid, isCvvValid: cvvValidity.isValid, isExpiryValid: expiryValidity.isValid, gqlErrorsObject });
 
         onChange({ value: { number, cvv, expiry }, valid, errors });
 
@@ -157,10 +185,11 @@ type CardNumberFieldProps = {|
     onChange : ({| value : string, valid : boolean, errors : [$Values<typeof CARD_ERRORS>] | [] |}) => void,
     styleObject : CardStyle,
     placeholder : {| number? : string, expiry? : string, cvv? : string  |},
-    autoFocusRef : (mixed) => void
+    autoFocusRef : (mixed) => void,
+    gqlErrors : []
 |};
 
-export function CardNumberField({ cspNonce, onChange, styleObject = {}, placeholder = {}, autoFocusRef } : CardNumberFieldProps) : mixed {
+export function CardNumberField({ cspNonce, onChange, styleObject = {}, placeholder = {}, autoFocusRef, gqlErrors = [] } : CardNumberFieldProps) : mixed {
     const [ number, setNumber ] : [ string, (string) => string ] = useState('');
     const [ numberValidity, setNumberValidity ] : [ FieldValidity, (FieldValidity) => FieldValidity ] = useState(initFieldValidity);
     const [ generalStyle, inputStyle ] = getStyles(styleObject);
@@ -174,8 +203,14 @@ export function CardNumberField({ cspNonce, onChange, styleObject = {}, placehol
     }, []);
 
     useEffect(() => {
-        const errors = setErrors({ isNumberValid: numberValidity.isValid });
+        const hasQQLErros = gqlErrors.length > 0;
+        if (hasQQLErros) {
+            setNumberValidity({ isPossibleValid: false, isValid: false });
+        }
+    }, [ gqlErrors ]);
 
+    useEffect(() => {
+        const errors = setErrors({ isNumberValid: numberValidity.isValid, gqlErrorsObject: { field: CARD_FIELD_TYPE.NUMBER, errors: gqlErrors } });
         onChange({ value: number, valid: numberValidity.isValid, errors });
     }, [ number, isValid, isPossibleValid ]);
 
@@ -189,7 +224,7 @@ export function CardNumberField({ cspNonce, onChange, styleObject = {}, placehol
                 ref={ numberRef }
                 type='text'
                 // eslint-disable-next-line react/forbid-component-props
-                className={ `number ${ numberValidity.isPossibleValid ? 'valid' : 'invalid' }` }
+                className={ `number ${ numberValidity.isPossibleValid || numberValidity.isValid ? 'valid' : 'invalid' }` }
                 // eslint-disable-next-line react/forbid-component-props
                 style={ inputStyle }
                 placeholder={ placeholder.number ?? DEFAULT_PLACEHOLDERS.number }
