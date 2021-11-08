@@ -241,10 +241,11 @@ type CardExpiryFieldProps = {|
     onChange : ({| value : string, valid : boolean, errors : [$Values<typeof CARD_ERRORS>] | [] |}) => void,
     styleObject : CardStyle,
     placeholder : {| number? : string, expiry? : string, cvv? : string  |},
-    autoFocusRef : (mixed) => void
+    autoFocusRef : (mixed) => void,
+    gqlErrors : []
 |};
 
-export function CardExpiryField({ cspNonce, onChange, styleObject = {}, placeholder = {}, autoFocusRef } : CardExpiryFieldProps) : mixed {
+export function CardExpiryField({ cspNonce, onChange, styleObject = {}, placeholder = {}, autoFocusRef, gqlErrors = [] } : CardExpiryFieldProps) : mixed {
     const [ expiry, setExpiry ] : [ string, (string) => string ] = useState('');
     const [ expiryValidity, setExpiryValidity ] : [ FieldValidity, (FieldValidity) => FieldValidity ] = useState(initFieldValidity);
     const [ generalStyle, inputStyle ] = getStyles(styleObject);
@@ -256,6 +257,13 @@ export function CardExpiryField({ cspNonce, onChange, styleObject = {}, placehol
     useEffect(() => {
         autoFocusRef(expiryRef);
     }, []);
+
+    useEffect(() => {
+        const hasQQLErros = gqlErrors.length > 0;
+        if (hasQQLErros) {
+            setExpiryValidity({ isPossibleValid: false, isValid: false });
+        }
+    }, [ gqlErrors ]);
     
     useEffect(() => {
         const errors = setErrors({ isExpiryValid: expiryValidity.isValid });
@@ -289,10 +297,11 @@ type CardCvvFieldProps = {|
     onChange : ({| value : string, valid : boolean, errors : [$Values<typeof CARD_ERRORS>] | [] |}) => void,
     styleObject : CardStyle,
     placeholder : {| number? : string, expiry? : string, cvv? : string  |},
-    autoFocusRef : (mixed) => void
+    autoFocusRef : (mixed) => void,
+    gqlErrors : []
 |};
 
-export function CardCVVField({ cspNonce, onChange, styleObject = {}, placeholder = {}, autoFocusRef } : CardCvvFieldProps) : mixed {
+export function CardCVVField({ cspNonce, onChange, styleObject = {}, placeholder = {}, autoFocusRef, gqlErrors = [] } : CardCvvFieldProps) : mixed {
     const [ cvv, setCvv ] : [ string, (string) => string ] = useState('');
     const [ cvvValidity, setCvvValidity ] : [ FieldValidity, (FieldValidity) => FieldValidity ] = useState(initFieldValidity);
     const [ generalStyle, inputStyle ] = getStyles(styleObject);
@@ -304,6 +313,13 @@ export function CardCVVField({ cspNonce, onChange, styleObject = {}, placeholder
     useEffect(() => {
         autoFocusRef(cvvRef);
     }, []);
+
+    useEffect(() => {
+        const hasQQLErros = gqlErrors.length > 0;
+        if (hasQQLErros) {
+            setCvvValidity({ isPossibleValid: false, isValid: false });
+        }
+    }, [ gqlErrors ]);
 
     useEffect(() => {
         const errors = setErrors({ isCvvValid: cvvValidity.isValid });

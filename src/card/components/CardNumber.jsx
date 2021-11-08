@@ -108,7 +108,7 @@ export function CardNumber(
         if (contentPasted) {
             startCursorPosition = maskedValue.length;
             endCursorPosition  = maskedValue.length;
-        } else if (maskedInputValue.length !== maskedValue.length && maskedValue.length === selectionStart + 1) {
+        } else if (maskedValue.length > maskedInputValue.length && maskedValue[selectionStart - 1] === ' ') {
             startCursorPosition += 1;
             endCursorPosition += 1;
         }

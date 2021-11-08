@@ -95,6 +95,7 @@ export function emitGqlErrors(mapErrors : Object) : void {
 
     if (cardFrame) {
         let cardFieldError = { field: '', errors: [] };
+
         if (number) {
             cardFieldError = { field: 'number', errors: number };
         }
@@ -110,15 +111,15 @@ export function emitGqlErrors(mapErrors : Object) : void {
         cardFrame.setGqlErrors(cardFieldError);
     }
 
-    if (cardNumberFrame) {
+    if (cardNumberFrame && number) {
         cardNumberFrame.setGqlErrors({ field: 'number', errors: number });
     }
 
-    if (cardExpiryFrame) {
+    if (cardExpiryFrame && expiry) {
         cardExpiryFrame.setGqlErrors({ field: 'expiry', errors: expiry });
     }
 
-    if (cardCVVFrame) {
+    if (cardCVVFrame && security_code) {
         cardCVVFrame.setGqlErrors({ field: 'cvv', errors: security_code });
     }
 }

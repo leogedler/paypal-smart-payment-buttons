@@ -45,15 +45,15 @@ function Page({ cspNonce, props } : PageProps) : mixed {
             errorObject.singleField = { ...errorData };
         }
 
-        if (type === CARD_FIELD_TYPE.NUMBER) {
+        if (type === CARD_FIELD_TYPE.NUMBER && errors && errors.length) {
             errorObject.numberField = [ ...errors ];
         }
 
-        if (type === CARD_FIELD_TYPE.EXPIRY) {
+        if (type === CARD_FIELD_TYPE.EXPIRY && errors && errors.length) {
             errorObject.expiryField = [ ...errors ];
         }
 
-        if (type === CARD_FIELD_TYPE.CVV) {
+        if (type === CARD_FIELD_TYPE.CVV && errors && errors.length) {
             errorObject.cvvField = [ ...errors ];
         }
 
@@ -156,6 +156,7 @@ function Page({ cspNonce, props } : PageProps) : mixed {
                 (type === CARD_FIELD_TYPE.CVV)
                     ? <CardCVVField
                         ref={ mainRef }
+                        gqlErrors={ fieldGQLErrors.cvvField }
                         cspNonce={ cspNonce }
                         onChange={ onFieldChange }
                         styleObject={ style }
@@ -168,6 +169,7 @@ function Page({ cspNonce, props } : PageProps) : mixed {
                 (type === CARD_FIELD_TYPE.EXPIRY)
                     ? <CardExpiryField
                         ref={ mainRef }
+                        gqlErrors={ fieldGQLErrors.expiryField }
                         cspNonce={ cspNonce }
                         onChange={ onFieldChange }
                         styleObject={ style }
