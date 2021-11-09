@@ -96,7 +96,6 @@ export function CardField({ cspNonce, onChange, styleObject = {}, placeholder = 
                 setCvvValidity({ isPossibleValid: false, isValid: false });
             }
         }
-
     }, [ gqlErrorsObject ]);
    
     useEffect(() => {
