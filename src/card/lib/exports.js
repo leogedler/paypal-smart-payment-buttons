@@ -8,7 +8,7 @@ export type ExportsOptions = {|
     // eslint-disable-next-line no-undef
     getFieldValue : <T>() => T,
     setGqlErrors : ({| field : string, errors : [] |}) => void,
-    cleanGqlErrors : () => void
+    resetGQLErrors : () => void
 |};
 
 export type CardExports<V> = {|
@@ -16,16 +16,16 @@ export type CardExports<V> = {|
     isFieldValid : () => boolean,
     getFieldValue : () => V,
     setGqlErrors : ({| field : string, errors : [] |}) => void,
-    cleanGqlErrors : () => void
+    resetGQLErrors : () => void
 |};
 
-export function setupExports<T>({ name, isFieldValid, getFieldValue, setGqlErrors, cleanGqlErrors } : ExportsOptions) {
+export function setupExports<T>({ name, isFieldValid, getFieldValue, setGqlErrors, resetGQLErrors } : ExportsOptions) {
     const xports : CardExports<T> = {
         name,
         isFieldValid,
         getFieldValue,
         setGqlErrors,
-        cleanGqlErrors
+        resetGQLErrors
     };
 
     window.exports = xports;

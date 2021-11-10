@@ -77,22 +77,22 @@ export function CardField({ cspNonce, onChange, styleObject = {}, placeholder = 
         const { field, errors } = gqlErrorsObject;
 
         if (field === CARD_FIELD_TYPE.NUMBER) {
-            const hasGQLErros = errors.length > 0;
-            if (hasGQLErros) {
+            const hasGQLErrors = errors.length > 0;
+            if (hasGQLErrors) {
                 setNumberValidity({ isPossibleValid: false, isValid: false });
             }
         }
 
         if (field === CARD_FIELD_TYPE.EXPIRY) {
-            const hasGQLErros = errors.length > 0;
-            if (hasGQLErros) {
+            const hasGQLErrors = errors.length > 0;
+            if (hasGQLErrors) {
                 setExpiryValidity({ isPossibleValid: false, isValid: false });
             }
         }
 
         if (field === CARD_FIELD_TYPE.CVV) {
-            const hasGQLErros = errors.length > 0;
-            if (hasGQLErros) {
+            const hasGQLErrors = errors.length > 0;
+            if (hasGQLErrors) {
                 setCvvValidity({ isPossibleValid: false, isValid: false });
             }
         }
@@ -202,8 +202,8 @@ export function CardNumberField({ cspNonce, onChange, styleObject = {}, placehol
     }, []);
 
     useEffect(() => {
-        const hasGQLErros = gqlErrors.length > 0;
-        if (hasGQLErros) {
+        const hasGQLErrors = gqlErrors.length > 0;
+        if (hasGQLErrors) {
             setNumberValidity({ isPossibleValid: false, isValid: false });
         }
     }, [ gqlErrors ]);
@@ -258,8 +258,8 @@ export function CardExpiryField({ cspNonce, onChange, styleObject = {}, placehol
     }, []);
 
     useEffect(() => {
-        const hasGQLErros = gqlErrors.length > 0;
-        if (hasGQLErros) {
+        const hasGQLErrors = gqlErrors.length > 0;
+        if (hasGQLErrors) {
             setExpiryValidity({ isPossibleValid: false, isValid: false });
         }
     }, [ gqlErrors ]);
@@ -314,8 +314,8 @@ export function CardCVVField({ cspNonce, onChange, styleObject = {}, placeholder
     }, []);
 
     useEffect(() => {
-        const hasGQLErros = gqlErrors.length > 0;
-        if (hasGQLErros) {
+        const hasGQLErrors = gqlErrors.length > 0;
+        if (hasGQLErrors) {
             setCvvValidity({ isPossibleValid: false, isValid: false });
         }
     }, [ gqlErrors ]);

@@ -484,9 +484,6 @@ describe('card fields cases', () => {
                 const orderID = generateOrderID();
                 const payerID = 'AAABBBCCC';
 
-                window.xprops.type = CARD_FIELD_TYPE.NUMBER;
-                window.xprops.type = CARD_FIELD_TYPE.EXPIRY;
-                window.xprops.type = CARD_FIELD_TYPE.CVV;
                 window.xprops.intent = INTENT.CAPTURE;
 
                 window.xprops.createOrder = mockAsyncProp(expect('createOrder', async () => {

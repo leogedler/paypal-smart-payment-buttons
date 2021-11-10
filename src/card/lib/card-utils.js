@@ -439,12 +439,12 @@ export function formatFieldValue(value : string | Card) : string | Card {
 }
 
 // Parse errors from ProcessPayment GQL mutation
-export function parseGQLErrors(errorsObject : Object) : {| parsedErrors : $ReadOnlyArray<string>, errors : $ReadOnlyArray<Object>, mapErrors : Object |} {
+export function parseGQLErrors(errorsObject : Object) : {| parsedErrors : $ReadOnlyArray<string>, errors : $ReadOnlyArray<Object>, errorsMap : Object |} {
     const { data } = errorsObject;
 
     const parsedErrors = [];
     const errors = [];
-    const mapErrors = {};
+    const errorsMap = {};
 
     if (Array.isArray(data) && data.length) {
         data.forEach(e => {
@@ -459,11 +459,11 @@ export function parseGQLErrors(errorsObject : Object) : {| parsedErrors : $ReadO
                         parsedError = GQL_ERRORS[d.field][d.issue] ?? `${ d.issue }: ${ d.description }`;
                         const field  = d.field.split('/').pop();
 
-                        if (!mapErrors[field]) {
-                            mapErrors[field] = [];
+                        if (!errorsMap[field]) {
+                            errorsMap[field] = [];
                         }
                         
-                        mapErrors[field].push(parsedError);
+                        errorsMap[field].push(parsedError);
 
                     } else if (d.issue && d.description) {
                         parsedError = GQL_ERRORS[d.issue] ?? `${ d.issue }: ${ d.description }`;
@@ -481,6 +481,6 @@ export function parseGQLErrors(errorsObject : Object) : {| parsedErrors : $ReadO
     return {
         errors,
         parsedErrors,
-        mapErrors
+        errorsMap
     };
 }

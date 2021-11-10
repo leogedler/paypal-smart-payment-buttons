@@ -49,15 +49,9 @@ function getCardFrames() : {| cardFrame : ?ExportsOptions,  cardNumberFrame : ?E
 
 
 export function hasCardFields() : boolean {
-    const { cardFrame } = getCardFrames();
+    const { cardFrame, cardNumberFrame, cardCVVFrame, cardExpiryFrame } = getCardFrames();
 
-    if (cardFrame) {
-        return true;
-    }
-
-    const { cardNumberFrame, cardCVVFrame, cardExpiryFrame } = getCardFrames();
-
-    if (cardNumberFrame && cardCVVFrame && cardExpiryFrame) {
+    if (cardFrame || (cardNumberFrame && cardCVVFrame && cardExpiryFrame)) {
         return true;
     }
 
@@ -88,10 +82,10 @@ export function getCardFields() : ?Card {
     throw new Error(`Card fields not available to submit`);
 }
 
-export function emitGqlErrors(mapErrors : Object) : void {
+export function emitGqlErrors(errorsMap : Object) : void {
     const { cardFrame, cardNumberFrame, cardExpiryFrame, cardCVVFrame } = getCardFrames();
 
-    const { number, expiry, security_code } = mapErrors;
+    const { number, expiry, security_code } = errorsMap;
 
     if (cardFrame) {
         let cardFieldError = { field: '', errors: [] };
@@ -124,23 +118,23 @@ export function emitGqlErrors(mapErrors : Object) : void {
     }
 }
 
-export function cleanGqlErrors() : void {
+export function resetGQLErrors() : void {
     const { cardFrame, cardNumberFrame, cardExpiryFrame, cardCVVFrame } = getCardFrames();
 
     if (cardFrame) {
-        cardFrame.cleanGqlErrors();
+        cardFrame.resetGQLErrors();
     }
 
     if (cardNumberFrame) {
-        cardNumberFrame.cleanGqlErrors();
+        cardNumberFrame.resetGQLErrors();
     }
 
     if (cardExpiryFrame) {
-        cardExpiryFrame.cleanGqlErrors();
+        cardExpiryFrame.resetGQLErrors();
     }
 
     if (cardCVVFrame) {
-        cardCVVFrame.cleanGqlErrors();
+        cardCVVFrame.resetGQLErrors();
     }
 }
 
@@ -151,7 +145,7 @@ type SubmitCardFieldsOptions = {|
 export function submitCardFields({ facilitatorAccessToken } : SubmitCardFieldsOptions) : ZalgoPromise<void> {
     const { intent, branded, vault, createOrder, onApprove, clientID } = getCardProps({ facilitatorAccessToken });
 
-    cleanGqlErrors();
+    resetGQLErrors();
 
     return ZalgoPromise.try(() => {
         if (!hasCardFields()) {
@@ -179,16 +173,16 @@ export function submitCardFields({ facilitatorAccessToken } : SubmitCardFieldsOp
 
                 const cardObject = {
                     cardNumber:     card.number,
-                    expirationDate: card.expiry,
+                    expirationDate: '01/2020',
                     securityCode:   card.cvv
                 };
 
                 return approveCardPayment({ card: cardObject, orderID, vault, branded, clientID }).catch((error) => {
 
-                    const { mapErrors, parsedErrors, errors } = parseGQLErrors(error);
+                    const { errorsMap, parsedErrors, errors } = parseGQLErrors(error);
 
-                    if (mapErrors) {
-                        emitGqlErrors(mapErrors);
+                    if (errorsMap) {
+                        emitGqlErrors(errorsMap);
                     }
 
                     getLogger().info('card_fields_payment_failed');

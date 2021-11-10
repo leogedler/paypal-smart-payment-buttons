@@ -60,7 +60,7 @@ function Page({ cspNonce, props } : PageProps) : mixed {
         setFieldGQLErrors(errorObject);
     };
 
-    const cleanGqlErrors = () => {
+    const resetGQLErrors = () => {
         setFieldGQLErrors({ singleField: {}, numberField: [], expiryField: [], cvvField: [] });
     };
 
@@ -81,7 +81,7 @@ function Page({ cspNonce, props } : PageProps) : mixed {
             isFieldValid,
             getFieldValue,
             setGqlErrors,
-            cleanGqlErrors
+            resetGQLErrors
         });
 
         xport({
@@ -92,12 +92,12 @@ function Page({ cspNonce, props } : PageProps) : mixed {
     }, [ fieldValid, fieldValue ]);
 
     const onFieldChange = ({ value, valid, errors }) => {
-        const newValue = formatFieldValue(value);
+        const newFieldValue = formatFieldValue(value);
         
-        setFieldValue(newValue);
+        setFieldValue(newFieldValue);
         setFieldErrors([ ...errors ]);
         setFieldValid(valid);
-        cleanGqlErrors();
+        resetGQLErrors();
     };
 
     return (

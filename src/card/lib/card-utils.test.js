@@ -190,7 +190,7 @@ describe('card utils', () => {
                 ]
             };
 
-            const { parsedErrors, errors, mapErrors } = parseGQLErrors(gqlError);
+            const { parsedErrors, errors, errorsMap } = parseGQLErrors(gqlError);
 
             expect(parsedErrors.length).toBe(1);
             expect(parsedErrors[0]).toBe('INVALID_NUMBER');
@@ -198,11 +198,11 @@ describe('card utils', () => {
             expect(errors.length).toBe(1);
             expect(errors[0]?.issue).toBe('VALIDATION_ERROR');
 
-            expect(mapErrors.number).not.toEqual(undefined);
-            expect(mapErrors.number.length).toBe(1);
+            expect(errorsMap.number).not.toEqual(undefined);
+            expect(errorsMap.number.length).toBe(1);
         });
 
-        it('should parse an invalid expity syntax error', () => {
+        it('should parse an invalid expiry syntax error', () => {
             const gqlError = {
                 path:    [
                     'processPayment'
@@ -230,7 +230,7 @@ describe('card utils', () => {
                 ]
             };
 
-            const { parsedErrors, errors, mapErrors } = parseGQLErrors(gqlError);
+            const { parsedErrors, errors, errorsMap } = parseGQLErrors(gqlError);
 
             expect(parsedErrors.length).toBe(2);
             expect(parsedErrors[0]).toBe('INVALID_EXPIRATION_DATE_FORMAT');
@@ -240,8 +240,8 @@ describe('card utils', () => {
             expect(errors[0]?.issue).toBe('INVALID_PARAMETER_SYNTAX');
             expect(errors[1]?.issue).toBe('INVALID_STRING_LENGTH');
 
-            expect(mapErrors.expiry).not.toEqual(undefined);
-            expect(mapErrors.expiry.length).toBe(2);
+            expect(errorsMap.expiry).not.toEqual(undefined);
+            expect(errorsMap.expiry.length).toBe(2);
         });
 
         it('should parse an expired card error', () => {
@@ -264,7 +264,7 @@ describe('card utils', () => {
                 ]
             };
 
-            const { parsedErrors, errors, mapErrors } = parseGQLErrors(gqlError);
+            const { parsedErrors, errors, errorsMap } = parseGQLErrors(gqlError);
 
             expect(parsedErrors.length).toBe(1);
             expect(parsedErrors[0]).toBe('CARD_EXPIRED');
@@ -272,8 +272,8 @@ describe('card utils', () => {
             expect(errors.length).toBe(1);
             expect(errors[0]?.issue).toBe('CARD_EXPIRED');
 
-            expect(mapErrors.expiry).not.toEqual(undefined);
-            expect(mapErrors.expiry.length).toBe(1);
+            expect(errorsMap.expiry).not.toEqual(undefined);
+            expect(errorsMap.expiry.length).toBe(1);
         });
 
         it('should parse a missing required field error', () => {
@@ -363,7 +363,7 @@ describe('card utils', () => {
 
     describe('styleToString', () => {
 
-        it('should stringfy a style object into a valid style string', () => {
+        it('should stringify a style object into a valid style string', () => {
 
             const objectStyle = {
                 height:     '60px',
