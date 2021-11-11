@@ -173,7 +173,7 @@ export function submitCardFields({ facilitatorAccessToken } : SubmitCardFieldsOp
 
                 const cardObject = {
                     cardNumber:     card.number,
-                    expirationDate: '01/2020',
+                    expirationDate: card.expiry,
                     securityCode:   card.cvv
                 };
 

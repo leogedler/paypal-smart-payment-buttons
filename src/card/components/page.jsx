@@ -43,17 +43,11 @@ function Page({ cspNonce, props } : PageProps) : mixed {
 
         if (type === CARD_FIELD_TYPE.SINGLE) {
             errorObject.singleField = { ...errorData };
-        }
-
-        if (type === CARD_FIELD_TYPE.NUMBER && errors && errors.length) {
+        } else if (type === CARD_FIELD_TYPE.NUMBER && errors && errors.length) {
             errorObject.numberField = [ ...errors ];
-        }
-
-        if (type === CARD_FIELD_TYPE.EXPIRY && errors && errors.length) {
+        } else if (type === CARD_FIELD_TYPE.EXPIRY && errors && errors.length) {
             errorObject.expiryField = [ ...errors ];
-        }
-
-        if (type === CARD_FIELD_TYPE.CVV && errors && errors.length) {
+        } else if (type === CARD_FIELD_TYPE.CVV && errors && errors.length) {
             errorObject.cvvField = [ ...errors ];
         }
 
