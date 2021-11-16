@@ -846,8 +846,8 @@ export function payWithPaymentMethodToken({ orderID, paymentMethodToken, clientI
 type TokenizeCardOptions = {|
     card : {|
         number : string,
-        cvv : string,
-        expiry : string
+        cvv? : string,
+        expiry? : string
     |}
 |};
 
@@ -872,8 +872,8 @@ type ApproveCardPaymentOptions = {|
     clientID : string,
     card : {|
         cardNumber : string,
-        expirationDate : string,
-        securityCode : string,
+        expirationDate? : string,
+        securityCode? : string,
         postalCode? : string
     |}
 |};

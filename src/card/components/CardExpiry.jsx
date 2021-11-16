@@ -53,7 +53,7 @@ export function CardExpiry(
     } : CardExpiryProps
 ) : mixed {
     const [ inputState, setInputState ] : [ InputState, (InputState | InputState => InputState) => InputState ] = useState({ ...defaultInputState, ...state });
-    const { inputValue, maskedInputValue, keyStrokeCount, isValid, isPossibleValid, contentPasted } = inputState;
+    const { inputValue, maskedInputValue, keyStrokeCount, isValid, isPotentiallyValid, contentPasted } = inputState;
 
 
     useEffect(() => {
@@ -63,13 +63,13 @@ export function CardExpiry(
 
     useEffect(() => {
         if (typeof onValidityChange === 'function') {
-            onValidityChange({ isValid, isPossibleValid });
+            onValidityChange({ isValid, isPotentiallyValid });
         }
 
         if (allowNavigation && maskedInputValue && isValid) {
             navigation.next();
         }
-    }, [ isValid, isPossibleValid ]);
+    }, [ isValid, isPotentiallyValid ]);
 
     const setDateMask : (InputEvent) => void = (event : InputEvent) : void => {
         const { value : rawValue, selectionStart, selectionEnd } = event.target;
@@ -117,7 +117,7 @@ export function CardExpiry(
             onFocus(event);
         }
         if (!isValid) {
-            setInputState((newState) => ({ ...newState, isPossibleValid: true }));
+            setInputState((newState) => ({ ...newState, isPotentiallyValid: true }));
         }
     };
 
@@ -126,7 +126,7 @@ export function CardExpiry(
             onBlur(event);
         }
         if (!isValid) {
-            setInputState((newState) => ({ ...newState, isPossibleValid: false, contentPasted: false }));
+            setInputState((newState) => ({ ...newState, isPotentiallyValid: false, contentPasted: false }));
         }
     };
 

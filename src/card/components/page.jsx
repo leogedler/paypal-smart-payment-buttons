@@ -60,8 +60,8 @@ function Page({ cspNonce, props } : PageProps) : mixed {
 
     useEffect(() => {
         onChange({
-            valid:  fieldValid,
-            errors: fieldErrors
+            isValid:  fieldValid,
+            errors:   fieldErrors
         });
     }, [ fieldValid, fieldErrors ]);
 

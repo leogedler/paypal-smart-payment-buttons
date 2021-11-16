@@ -71,7 +71,7 @@ export function CardNumber(
     const [ cardType, setCardType ] : [ CardType, (CardType) => CardType ] = useState(DEFAULT_CARD_TYPE);
     const [ inputState, setInputState ] : [ InputState, (InputState | InputState => InputState) => InputState ] = useState({ ...defaultInputState, ...state });
 
-    const { inputValue, maskedInputValue, cursorStart, cursorEnd, keyStrokeCount, isValid, isPossibleValid, contentPasted } = inputState;
+    const { inputValue, maskedInputValue, cursorStart, cursorEnd, keyStrokeCount, isValid, isPotentiallyValid, contentPasted } = inputState;
 
     useEffect(() => {
         const validity = checkCardNumber(inputValue, cardType);
@@ -81,14 +81,14 @@ export function CardNumber(
 
     useEffect(() => {
         if (typeof onValidityChange === 'function') {
-            onValidityChange({ isValid, isPossibleValid });
+            onValidityChange({ isValid, isPotentiallyValid });
         }
 
         if (validateNavigation({ allowNavigation, inputState })) {
             navigation.next();
         }
 
-    }, [ isValid, isPossibleValid ]);
+    }, [ isValid, isPotentiallyValid ]);
 
 
     const setValueAndCursor : (InputEvent) => void = (event : InputEvent) : void => {
@@ -137,19 +137,19 @@ export function CardNumber(
         const maskedValue = maskCard(inputValue);
         const updatedState = { ...inputState, maskedInputValue: maskedValue };
         if (!isValid) {
-            updatedState.isPossibleValid = true;
+            updatedState.isPotentiallyValid = true;
         }
 
         setInputState((newState) => ({ ...newState, ...updatedState }));
     };
 
     const onBlurEvent : (InputEvent) => void = (event : InputEvent) : void => {
-        const updatedState = { maskedInputValue, isPossibleValid, contentPasted: false };
+        const updatedState = { maskedInputValue, isPotentiallyValid, contentPasted: false };
 
         if (isValid) {
             updatedState.maskedInputValue = maskValidCard(maskedInputValue);
         } else {
-            updatedState.isPossibleValid = false;
+            updatedState.isPotentiallyValid = false;
         }
 
         if (typeof onBlur === 'function') {

@@ -64,16 +64,16 @@ export const defaultNavigation : CardNavigation = {
 };
 
 export const defaultInputState : InputState = {
-    inputValue:       '',
-    maskedInputValue: '',
-    cursorStart:      0,
-    cursorEnd:        0,
-    keyStrokeCount:   0,
-    isPossibleValid:  true,
-    isValid:          false
+    inputValue:         '',
+    maskedInputValue:   '',
+    cursorStart:        0,
+    cursorEnd:          0,
+    keyStrokeCount:     0,
+    isPotentiallyValid:  true,
+    isValid:            false
 };
 
-export const initFieldValidity : FieldValidity = { isValid: false, isPossibleValid: true };
+export const initFieldValidity : FieldValidity = { isValid: false, isPotentiallyValid: true };
 
 export function splice(str : string, idx : number, insert : string) : string {
     return str.slice(0, idx) + insert + str.slice(idx);
@@ -149,7 +149,7 @@ export function removeDateMask(date : string) : string {
 export function formatDate(date : string, prevFormat? : string = '') : string {
     assertString(date);
 
-    if (prevFormat && prevFormat.indexOf('/') > -1) {
+    if (prevFormat && prevFormat.includes('/')) {
         const [ month ] = removeSpaces(prevFormat).split('/');
         if (month.length < 2) {
             return prevFormat;
@@ -191,7 +191,7 @@ export function filterStyles(rawStyles : Object = {}) : FieldStyle {
     return Object.keys(rawStyles).reduce((acc : Object, key : string) => {
         if (typeof rawStyles[key] === 'object') {
             acc[key] = rawStyles[key];
-        } else if (camelKey.indexOf(key) > -1 || dashKey.indexOf(key) > -1) {
+        } else if (camelKey.includes(key) || dashKey.includes(key)) {
             acc[key] = rawStyles[key];
         }
         return acc;
@@ -245,7 +245,7 @@ export function getCvvLength(cardType? : CardType) : number {
     return 3;
 }
 
-export function checkCardNumber(value : string, cardType : CardType) : {| isValid : boolean, isPossibleValid : boolean |} {
+export function checkCardNumber(value : string, cardType : CardType) : {| isValid : boolean, isPotentiallyValid : boolean |} {
     const trimmedValue = removeSpaces(value);
     const { lengths } = cardType;
 
@@ -255,29 +255,29 @@ export function checkCardNumber(value : string, cardType : CardType) : {| isVali
     const maxLength = Math.max.apply(null, lengths);
 
     return {
-        isValid:         validLength && validLuhn,
-        isPossibleValid: validLength || trimmedValue.length < maxLength
+        isValid:            validLength && validLuhn,
+        isPotentiallyValid: validLength || trimmedValue.length < maxLength
     };
 }
 
-export function checkCVV(value : string, cardType : CardType) : {| isValid : boolean, isPossibleValid : boolean |} {
+export function checkCVV(value : string, cardType : CardType) : {| isValid : boolean, isPotentiallyValid : boolean |} {
     let isValid = false;
     if (value.length === getCvvLength(cardType)) {
         isValid = true;
     }
     return {
         isValid,
-        isPossibleValid: true
+        isPotentiallyValid: true
     };
 }
 
-export function checkExpiry(value : string) : {| isValid : boolean, isPossibleValid : boolean |} {
+export function checkExpiry(value : string) : {| isValid : boolean, isPotentiallyValid : boolean |} {
     const { expirationDate } = cardValidator;
     const { isValid } = expirationDate(value);
 
     return {
         isValid,
-        isPossibleValid: true
+        isPotentiallyValid: true
     };
 }
 
@@ -288,7 +288,7 @@ export function setErrors({ isNumberValid, isCvvValid, isExpiryValid, gqlErrorsO
 
     if (typeof isNumberValid === 'boolean' && !isNumberValid) {
 
-        if (field === CARD_FIELD_TYPE.NUMBER  && gqlErrors.length) {
+        if (field === CARD_FIELD_TYPE.NUMBER && gqlErrors.length) {
             errors.push(...gqlErrors);
         } else {
             errors.push(CARD_ERRORS.INVALID_NUMBER);
@@ -350,11 +350,11 @@ export function goToPreviousField(ref : {| current : {| base : HTMLInputElement 
 export function navigateOnKeyDown(event : InputEvent, navigation : CardNavigation) : void {
     const { target: { value, selectionStart, selectionEnd }, key } = event;
 
-    if (selectionStart === 0 && (value.length === 0 || value.length !== selectionEnd)  && [ 'Backspace', 'ArrowLeft' ].indexOf(key) > -1) {
+    if (selectionStart === 0 && (value.length === 0 || value.length !== selectionEnd)  && [ 'Backspace', 'ArrowLeft' ].includes(key)) {
         navigation.previous();
     }
 
-    if (selectionStart === value.length && [ 'ArrowRight' ].indexOf(key) > -1) {
+    if (selectionStart === value.length && [ 'ArrowRight' ].includes(key)) {
         navigation.next();
     }
 }

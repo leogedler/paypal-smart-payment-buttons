@@ -149,13 +149,13 @@ describe('card utils', () => {
             expect(masked).toBe('10 / ');
         });
 
-        it('format number adding slash to separate month section from year section', () => {
+        it('format number by adding a slash to separate the month from the year', () => {
             const masked = formatDate('22');
 
             expect(masked).toBe('02 / 2');
         });
 
-        it('returns prevMask if it is possible valid', () => {
+        it('returns prevMask if it is valid', () => {
             const masked = formatDate('22');
 
             expect(masked).toBe('02 / 2');
@@ -297,13 +297,16 @@ describe('card utils', () => {
                 ]
             };
 
-            const { parsedErrors, errors } = parseGQLErrors(gqlError);
+            const { parsedErrors, errors, errorsMap } = parseGQLErrors(gqlError);
 
             expect(parsedErrors.length).toBe(1);
             expect(parsedErrors[0]).toBe('MISSING_NUMBER');
 
             expect(errors.length).toBe(1);
             expect(errors[0]?.issue).toBe('MISSING_REQUIRED_PARAMETER');
+
+            expect(errorsMap.number).not.toEqual(undefined);
+            expect(errorsMap.number.length).toBe(1);
         });
 
         it('should parse refused transaction error', () => {
@@ -324,13 +327,15 @@ describe('card utils', () => {
                 ]
             };
 
-            const { parsedErrors, errors } = parseGQLErrors(gqlError);
+            const { parsedErrors, errors, errorsMap } = parseGQLErrors(gqlError);
 
             expect(parsedErrors.length).toBe(1);
             expect(parsedErrors[0]).toBe('TRANSACTION_REJECTED');
 
             expect(errors.length).toBe(1);
             expect(errors[0]?.issue).toBe('TRANSACTION_REFUSED');
+
+            expect(Object.keys(errorsMap).length).toEqual(0);
         });
 
         it('should return errors for unhandled (not defined on the constants) cases', () => {
@@ -351,13 +356,15 @@ describe('card utils', () => {
                 ]
             };
 
-            const { parsedErrors, errors } = parseGQLErrors(gqlError);
+            const { parsedErrors, errors, errorsMap } = parseGQLErrors(gqlError);
 
             expect(parsedErrors.length).toBe(1);
             expect(parsedErrors[0]).toBe('PERMISSION_DENIED: You do not have permission to access or perform operations on this resource.');
 
             expect(errors.length).toBe(1);
             expect(errors[0]?.issue).toBe('PERMISSION_DENIED');
+
+            expect(Object.keys(errorsMap).length).toEqual(0);
         });
     });
 
