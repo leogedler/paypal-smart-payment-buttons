@@ -847,7 +847,8 @@ type TokenizeCardOptions = {|
     card : {|
         number : string,
         cvv? : string,
-        expiry? : string
+        expiry? : string,
+        name? : string
     |}
 |};
 

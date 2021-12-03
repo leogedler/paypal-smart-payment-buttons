@@ -32,18 +32,20 @@ function getExportsByFrameName<T>(name : $Values<typeof FRAME_NAME>) : ?CardExpo
 }
 
 
-function getCardFrames() : {| cardFrame : ?ExportsOptions,  cardNumberFrame : ?ExportsOptions, cardCVVFrame : ?ExportsOptions, cardExpiryFrame : ?ExportsOptions |} {
+function getCardFrames() : {| cardFrame : ?ExportsOptions,  cardNumberFrame : ?ExportsOptions, cardCVVFrame : ?ExportsOptions, cardExpiryFrame : ?ExportsOptions, cardNameFrame : ?ExportsOptions |} {
 
     const cardFrame = getExportsByFrameName(FRAME_NAME.CARD_FIELD);
     const cardNumberFrame = getExportsByFrameName(FRAME_NAME.CARD_NUMBER_FIELD);
     const cardCVVFrame = getExportsByFrameName(FRAME_NAME.CARD_CVV_FIELD);
     const cardExpiryFrame = getExportsByFrameName(FRAME_NAME.CARD_EXPIRY_FIELD);
+    const cardNameFrame = getExportsByFrameName(FRAME_NAME.CARD_NAME_FIELD);
 
     return {
         cardFrame,
         cardNumberFrame,
         cardCVVFrame,
-        cardExpiryFrame
+        cardExpiryFrame,
+        cardNameFrame
     };
 }
 
@@ -65,17 +67,19 @@ export function getCardFields() : ?Card {
         return cardFrame.getFieldValue();
     }
 
-    const { cardNumberFrame, cardCVVFrame, cardExpiryFrame } = getCardFrames();
+    const { cardNumberFrame, cardCVVFrame, cardExpiryFrame, cardNameFrame } = getCardFrames();
 
     if (
         cardNumberFrame && cardNumberFrame.isFieldValid() &&
         cardCVVFrame && cardCVVFrame.isFieldValid() &&
-        cardExpiryFrame && cardExpiryFrame.isFieldValid()
+        cardExpiryFrame && cardExpiryFrame.isFieldValid() &&
+        (cardNameFrame ? cardExpiryFrame.isFieldValid() : true)
     ) {
         return {
             number: cardNumberFrame.getFieldValue(),
             cvv:    cardCVVFrame.getFieldValue(),
-            expiry: cardExpiryFrame.getFieldValue()
+            expiry: cardExpiryFrame.getFieldValue(),
+            name:   cardNameFrame && cardExpiryFrame.isFieldValid() ? cardNameFrame.getFieldValue() : ''
         };
     }
 

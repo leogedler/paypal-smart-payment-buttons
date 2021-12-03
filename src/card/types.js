@@ -8,7 +8,8 @@ export type SetupCardOptions = {|
 export type Card = {|
     number : string,
     cvv? : string,
-    expiry? : string
+    expiry? : string,
+    name? : string
 |};
 
 export type FieldStyle = {|
@@ -63,7 +64,8 @@ export type CardStyle = {| |};
 export type CardPlaceholder = {|
     number? : string,
     expiry? : string,
-    cvv? : string
+    cvv? : string,
+    name? : string
 |};
 
 export type CardType = {|
@@ -100,6 +102,11 @@ export type CardExpiryChangeEvent = {|
 export type CardCvvChangeEvent = {|
     event : InputEvent,
     cardCvv : string
+|};
+
+export type CardNameChangeEvent = {|
+    event : InputEvent,
+    cardName : string
 |};
 
 export type FieldValidity = {|

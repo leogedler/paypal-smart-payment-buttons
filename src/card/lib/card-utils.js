@@ -271,6 +271,17 @@ export function checkCVV(value : string, cardType : CardType) : {| isValid : boo
     };
 }
 
+export function checkName(value : string) : {| isValid : boolean, isPotentiallyValid : boolean |} {
+    let isValid = false;
+    if (value.length >= 5 && value.length <= 200) {
+        isValid = true;
+    }
+    return {
+        isValid,
+        isPotentiallyValid: true
+    };
+}
+
 export function checkExpiry(value : string) : {| isValid : boolean, isPotentiallyValid : boolean |} {
     const { expirationDate } = cardValidator;
     const { isValid } = expirationDate(value);
@@ -281,7 +292,7 @@ export function checkExpiry(value : string) : {| isValid : boolean, isPotentiall
     };
 }
 
-export function setErrors({ isNumberValid, isCvvValid, isExpiryValid, gqlErrorsObject = {} } : {| isNumberValid? : boolean, isCvvValid? : boolean, isExpiryValid? : boolean, gqlErrorsObject? : {| field : string, errors : [] |} |}) : [$Values<typeof CARD_ERRORS>] | [] {
+export function setErrors({ isNumberValid, isCvvValid, isExpiryValid, isNameValid, gqlErrorsObject = {} } : {| isNumberValid? : boolean, isCvvValid? : boolean, isExpiryValid? : boolean, isNameValid? : boolean, gqlErrorsObject? : {| field : string, errors : [] |} |}) : [$Values<typeof CARD_ERRORS>] | [] {
     const errors = [];
 
     const { field, errors: gqlErrors } = gqlErrorsObject;
@@ -311,6 +322,15 @@ export function setErrors({ isNumberValid, isCvvValid, isExpiryValid, gqlErrorsO
             errors.push(...gqlErrors);
         } else {
             errors.push(CARD_ERRORS.INVALID_CVV);
+        }
+    }
+
+    if (typeof isNameValid === 'boolean' &&  !isNameValid) {
+
+        if (field === CARD_FIELD_TYPE.NAME  && gqlErrors.length) {
+            errors.push(...gqlErrors);
+        } else {
+            errors.push(CARD_ERRORS.INVALID_NAME);
         }
     }
 

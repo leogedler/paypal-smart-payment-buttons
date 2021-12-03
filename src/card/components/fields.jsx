@@ -21,6 +21,7 @@ import type {
     CardNumberChangeEvent,
     CardExpiryChangeEvent,
     CardCvvChangeEvent,
+    CardNameChangeEvent,
     FieldValidity,
     CardNavigation,
     CardType
@@ -37,6 +38,7 @@ import {
 import { CardNumber } from './CardNumber';
 import { CardExpiry } from './CardExpiry';
 import { CardCVV } from './CardCVV';
+import { CardName } from './CardName';
 
 
 type CardFieldProps = {|
@@ -183,7 +185,7 @@ type CardNumberFieldProps = {|
     cspNonce : string,
     onChange : ({| value : string, valid : boolean, errors : [$Values<typeof CARD_ERRORS>] | [] |}) => void,
     styleObject : CardStyle,
-    placeholder : {| number? : string, expiry? : string, cvv? : string  |},
+    placeholder : {| number? : string, expiry? : string, cvv? : string, name? : string  |},
     autoFocusRef : (mixed) => void,
     gqlErrors : []
 |};
@@ -239,7 +241,7 @@ type CardExpiryFieldProps = {|
     cspNonce : string,
     onChange : ({| value : string, valid : boolean, errors : [$Values<typeof CARD_ERRORS>] | [] |}) => void,
     styleObject : CardStyle,
-    placeholder : {| number? : string, expiry? : string, cvv? : string  |},
+    placeholder : {| number? : string, expiry? : string, cvv? : string, name? : string  |},
     autoFocusRef : (mixed) => void,
     gqlErrors : []
 |};
@@ -295,7 +297,7 @@ type CardCvvFieldProps = {|
     cspNonce : string,
     onChange : ({| value : string, valid : boolean, errors : [$Values<typeof CARD_ERRORS>] | [] |}) => void,
     styleObject : CardStyle,
-    placeholder : {| number? : string, expiry? : string, cvv? : string  |},
+    placeholder : {| number? : string, expiry? : string, cvv? : string, name? : string  |},
     autoFocusRef : (mixed) => void,
     gqlErrors : []
 |};
@@ -343,6 +345,63 @@ export function CardCVVField({ cspNonce, onChange, styleObject = {}, placeholder
                 maxLength='4'
                 onChange={ ({ cardCvv } : CardCvvChangeEvent) => setCvv(cardCvv) }
                 onValidityChange={ (validity : FieldValidity) => setCvvValidity(validity) }
+            />
+        </Fragment>
+    );
+}
+
+type CardNameFieldProps = {|
+    cspNonce : string,
+    onChange : ({| value : string, valid : boolean, errors : [$Values<typeof CARD_ERRORS>] | [] |}) => void,
+    styleObject : CardStyle,
+    placeholder : {| number? : string, expiry? : string, cvv? : string, name? : string  |},
+    autoFocusRef : (mixed) => void,
+    gqlErrors : []
+|};
+
+export function CardNameField({ cspNonce, onChange, styleObject = {}, placeholder = {}, autoFocusRef, gqlErrors = [] } : CardNameFieldProps) : mixed {
+    const [ name, setName ] : [ string, (string) => string ] = useState('');
+    const [ nameValidity, setNameValidity ] : [ FieldValidity, (FieldValidity) => FieldValidity ] = useState(initFieldValidity);
+    const [ generalStyle, inputStyle ] = getStyles(styleObject);
+    const cvvRef = useRef();
+    
+    const composedStyles = { ...{ input: DEFAULT_INPUT_STYLE },  ...generalStyle };
+    const { isValid, isPotentiallyValid } = nameValidity;
+
+    useEffect(() => {
+        autoFocusRef(cvvRef);
+    }, []);
+
+    useEffect(() => {
+        const hasGQLErrors = gqlErrors.length > 0;
+        if (hasGQLErrors) {
+            setNameValidity({ isPotentiallyValid: false, isValid: false });
+        }
+    }, [ gqlErrors ]);
+
+    useEffect(() => {
+        const errors = setErrors({ isNameValid: nameValidity.isValid });
+
+        onChange({ value: name, valid: nameValidity.isValid, errors });
+    }, [ name, isValid, isPotentiallyValid  ]);
+
+    return (
+        <Fragment>
+            <style nonce={ cspNonce }>
+                {styleToString(composedStyles)}
+            </style>
+
+            <CardName
+                ref={ cvvRef }
+                type='text'
+                // eslint-disable-next-line react/forbid-component-props
+                className={ `name ${ nameValidity.isPotentiallyValid || nameValidity.isValid ? 'valid' : 'invalid' }` }
+                // eslint-disable-next-line react/forbid-component-props
+                style={ inputStyle }
+                placeholder={ placeholder.name ?? DEFAULT_PLACEHOLDERS.name }
+                maxLength='100'
+                onChange={ ({ cardName } : CardNameChangeEvent) => setName(cardName) }
+                onValidityChange={ (validity : FieldValidity) => setNameValidity(validity) }
             />
         </Fragment>
     );

@@ -11,7 +11,7 @@ import { submitCardFields } from '../interface';
 import { getCardProps, type CardProps } from '../props';
 import type { SetupCardOptions } from '../types';
 
-import { CardField, CardNumberField, CardCVVField, CardExpiryField } from './fields';
+import { CardField, CardNumberField, CardCVVField, CardExpiryField, CardNameField } from './fields';
 
 type PageProps = {|
     cspNonce : string,
@@ -49,13 +49,15 @@ function Page({ cspNonce, props } : PageProps) : mixed {
             errorObject.expiryField = [ ...errors ];
         } else if (type === CARD_FIELD_TYPE.CVV && errors && errors.length) {
             errorObject.cvvField = [ ...errors ];
+        } else if (type === CARD_FIELD_TYPE.NAME && errors && errors.length) {
+            errorObject.nameField = [ ...errors ];
         }
 
         setFieldGQLErrors(errorObject);
     };
 
     const resetGQLErrors = () => {
-        setFieldGQLErrors({ singleField: {}, numberField: [], expiryField: [], cvvField: [] });
+        setFieldGQLErrors({ singleField: {}, numberField: [], expiryField: [], cvvField: [], nameField: [] });
     };
 
     useEffect(() => {
@@ -169,6 +171,19 @@ function Page({ cspNonce, props } : PageProps) : mixed {
                             styleObject={ style }
                             placeholder={ placeholder }
                             autoFocusRef={ (ref) => setRef(ref.current.base) }
+                    /> : null
+            }
+
+            {
+                (type === CARD_FIELD_TYPE.NAME)
+                    ? <CardNameField
+                        ref={ mainRef }
+                        gqlErrors={ fieldGQLErrors.nameField }
+                        cspNonce={ cspNonce }
+                        onChange={ onFieldChange }
+                        styleObject={ style }
+                        placeholder={ placeholder }
+                        autoFocusRef={ (ref) => setRef(ref.current.base) }
                     /> : null
             }
         </Fragment>
