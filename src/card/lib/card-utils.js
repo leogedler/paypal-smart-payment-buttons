@@ -273,7 +273,7 @@ export function checkCVV(value : string, cardType : CardType) : {| isValid : boo
 
 export function checkName(value : string) : {| isValid : boolean, isPotentiallyValid : boolean |} {
     let isValid = false;
-    if (value.length >= 5 && value.length <= 200) {
+    if (value.length >= 1 && value.length <= 255) {
         isValid = true;
     }
     return {

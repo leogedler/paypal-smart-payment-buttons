@@ -249,6 +249,22 @@ export function setupMocks() {
                         }
                     };
                 },
+                NameField: () => {
+                    return {
+                        render: () => {
+                            return props.createOrder().then(orderID => {
+                                return ZalgoPromise.delay(50).then(() => {
+                                    return props.onApprove({
+                                        orderID,
+                                        payerID: 'AAABBBCCC'
+                                    }).catch(err => {
+                                        return props.onError(err);
+                                    });
+                                });
+                            });
+                        }
+                    };
+                },
                 submit: () => {
                     return submitCardFields({ facilitatorAccessToken: 'ABCDEF12345' });
                 }

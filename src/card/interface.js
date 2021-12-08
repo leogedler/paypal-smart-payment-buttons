@@ -179,6 +179,7 @@ export function submitCardFields({ facilitatorAccessToken } : SubmitCardFieldsOp
                     cardNumber:     card.number,
                     expirationDate: card.expiry,
                     securityCode:   card.cvv
+                    // name:           card.name
                 };
 
                 return approveCardPayment({ card: cardObject, orderID, vault, branded, clientID }).catch((error) => {
