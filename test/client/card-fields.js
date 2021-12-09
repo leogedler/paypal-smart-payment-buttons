@@ -623,8 +623,6 @@ describe('card fields cases', () => {
                 const cardExpiry = '01/2022';
                 const cardCvv = '123';
 
-                renderCardFieldMock({ name: 'card-cvv-field', isFieldValid: () => true, getFieldValue: () => cardCvv });
-
                 const gqlMock = getGraphQLApiMock({
                     extraHandler: ({ data }) => {
                         if (!data.variables.orderID) {
@@ -808,8 +806,6 @@ describe('card fields cases', () => {
                 const cardExpiry = '01/20';
                 const cardCvv = '12';
 
-                renderCardFieldMock({ name: 'card-cvv-field', isFieldValid: () => true, getFieldValue: () => cardCvv });
-
                 const gqlMock = getGraphQLApiMock({
                     extraHandler: ({ data }) => {
                         if (!data.variables.orderID) {
@@ -968,7 +964,7 @@ describe('card fields cases', () => {
 
         });
 
-        it.only('should render multi card fields with createOrder and optinal field card holder\'s name', async () => {
+        it('should render multi card fields with createOrder and optinal field card holder\'s name', async () => {
 
             return await wrapPromise(async ({ expect }) => {
 
@@ -990,6 +986,11 @@ describe('card fields cases', () => {
                     expiry: 'MM/YY',
                     cvv:    'CVV'
                 };
+
+                const cardNumber = '5555555555554444';
+                const cardExpiry = '01/2022';
+                const cardCvv = '123';
+                const cardName = 'John Doe';
 
                 window.xprops.createOrder = mockAsyncProp(expect('createOrder', async () => {
                     return ZalgoPromise.try(() => {
@@ -1016,6 +1017,8 @@ describe('card fields cases', () => {
                             });
                         }));
 
+                        renderCardFieldMock({ name: 'card-number-field', isFieldValid: () => true, getFieldValue: () => cardNumber });
+                        setCardFieldsValues({ number: cardNumber });
                         return numberFieldToOriginal;
                         
                     }));
@@ -1035,6 +1038,8 @@ describe('card fields cases', () => {
                             });
                         }));
 
+                        renderCardFieldMock({ name: 'card-expiry-field', isFieldValid: () => true, getFieldValue: () => cardExpiry });
+                        setCardFieldsValues({ expiry: cardExpiry });
                         return expiryFieldToOriginal;
                         
                     }));
@@ -1054,6 +1059,8 @@ describe('card fields cases', () => {
                             });
                         }));
 
+                        renderCardFieldMock({ name: 'card-cvv-field', isFieldValid: () => true, getFieldValue: () => cardCvv });
+                        setCardFieldsValues({ cvv: cardCvv });
                         return cVVFieldToOriginal;
                         
                     }));
@@ -1077,6 +1084,8 @@ describe('card fields cases', () => {
                         
                     }));
 
+                    renderCardFieldMock({ name: 'card-name-field', isFieldValid: () => true, getFieldValue: () => cardCvv });
+                    setCardFieldsValues({ name: cardName });
                     return cardFieldInstance;
                 }));
                 
