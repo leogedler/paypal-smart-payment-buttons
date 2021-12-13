@@ -146,6 +146,14 @@ type SubmitCardFieldsOptions = {|
     facilitatorAccessToken : string
 |};
 
+type CardValues = {|
+    cardNumber : string,
+    expirationDate? : string,
+    securityCode? : string,
+    postalCode? : string,
+    name? : string
+|};
+
 export function submitCardFields({ facilitatorAccessToken } : SubmitCardFieldsOptions) : ZalgoPromise<void> {
     const { intent, branded, vault, createOrder, onApprove, clientID } = getCardProps({ facilitatorAccessToken });
 
@@ -175,12 +183,15 @@ export function submitCardFields({ facilitatorAccessToken } : SubmitCardFieldsOp
         if (intent === INTENT.CAPTURE || intent === INTENT.AUTHORIZE) {
             return createOrder().then(orderID => {
 
-                const cardObject = {
+                const cardObject : CardValues = {
                     cardNumber:     card.number,
                     expirationDate: card.expiry,
                     securityCode:   card.cvv
-                    // name:           card.name
                 };
+
+                if (card.name) {
+                    cardObject.name = card.name;
+                }
 
                 return approveCardPayment({ card: cardObject, orderID, vault, branded, clientID }).catch((error) => {
 
