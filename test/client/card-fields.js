@@ -1080,12 +1080,11 @@ describe('card fields cases', () => {
                             });
                         }));
 
+                        renderCardFieldMock({ name: 'card-name-field', isFieldValid: () => true, getFieldValue: () => cardName });
+                        setCardFieldsValues({ name: cardName });
                         return nameFieldToOriginal;
                         
                     }));
-
-                    renderCardFieldMock({ name: 'card-name-field', isFieldValid: () => true, getFieldValue: () => cardCvv });
-                    setCardFieldsValues({ name: cardName });
                     return cardFieldInstance;
                 }));
                 
