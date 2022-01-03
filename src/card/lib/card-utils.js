@@ -325,9 +325,9 @@ export function setErrors({ isNumberValid, isCvvValid, isExpiryValid, isNameVali
         }
     }
 
-    if (typeof isNameValid === 'boolean' &&  !isNameValid) {
+    if (typeof isNameValid === 'boolean' && !isNameValid) {
 
-        if (field === CARD_FIELD_TYPE.NAME  && gqlErrors.length) {
+        if (field === CARD_FIELD_TYPE.NAME && gqlErrors.length) {
             errors.push(...gqlErrors);
         } else {
             errors.push(CARD_ERRORS.INVALID_NAME);

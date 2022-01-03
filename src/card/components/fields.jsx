@@ -399,7 +399,7 @@ export function CardNameField({ cspNonce, onChange, styleObject = {}, placeholde
                 // eslint-disable-next-line react/forbid-component-props
                 style={ inputStyle }
                 placeholder={ placeholder.name ?? DEFAULT_PLACEHOLDERS.name }
-                maxLength='100'
+                maxLength='255'
                 onChange={ ({ cardName } : CardNameChangeEvent) => setName(cardName) }
                 onValidityChange={ (validity : FieldValidity) => setNameValidity(validity) }
             />

@@ -964,7 +964,7 @@ describe('card fields cases', () => {
 
         });
 
-        it('should render multi card fields with createOrder and optinal field card holder\'s name', async () => {
+        it('should render multi card fields with createOrder and optional cardholder name field', async () => {
 
             return await wrapPromise(async ({ expect }) => {
 

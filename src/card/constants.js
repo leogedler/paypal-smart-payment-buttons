@@ -152,5 +152,5 @@ export const DEFAULT_PLACEHOLDERS : CardPlaceholder = {
     number: 'Card number',
     expiry: 'MM/YY',
     cvv:    'CVV',
-    name:   'Card holder\'s name'
+    name:   'Cardholder name'
 };

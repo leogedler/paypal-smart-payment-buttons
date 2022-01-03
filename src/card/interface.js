@@ -73,13 +73,13 @@ export function getCardFields() : ?Card {
         cardNumberFrame && cardNumberFrame.isFieldValid() &&
         cardCVVFrame && cardCVVFrame.isFieldValid() &&
         cardExpiryFrame && cardExpiryFrame.isFieldValid() &&
-        (cardNameFrame ? cardExpiryFrame.isFieldValid() : true)
+        (cardNameFrame ? cardNameFrame.isFieldValid() : true)
     ) {
         return {
             number: cardNumberFrame.getFieldValue(),
             cvv:    cardCVVFrame.getFieldValue(),
             expiry: cardExpiryFrame.getFieldValue(),
-            name:   cardNameFrame && cardExpiryFrame.isFieldValid() ? cardNameFrame.getFieldValue() : ''
+            name:   cardNameFrame && cardNameFrame.isFieldValid() ? cardNameFrame.getFieldValue() : ''
         };
     }
 
