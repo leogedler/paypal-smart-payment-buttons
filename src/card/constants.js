@@ -154,3 +154,7 @@ export const DEFAULT_PLACEHOLDERS : CardPlaceholder = {
     cvv:    'CVV',
     name:   'Cardholder name'
 };
+
+export const VALID_EXTRA_FIELDS = [
+    'billingAddress'
+];

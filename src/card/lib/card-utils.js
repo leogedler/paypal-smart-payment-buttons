@@ -5,8 +5,8 @@ import creditCardType from 'credit-card-type';
 import luhn10 from 'card-validator/src/luhn-10';
 import cardValidator from 'card-validator';
 
-import type { CardType, CardNavigation, InputState, FieldValidity, FieldStyle, InputEvent, Card } from '../types';
-import { CARD_ERRORS, FIELD_STYLE, VALIDATOR_TO_TYPE_MAP, DEFAULT_CARD_TYPE, GQL_ERRORS, CARD_FIELD_TYPE } from '../constants';
+import type { CardType, CardNavigation, InputState, FieldValidity, FieldStyle, InputEvent, Card, ExtraFields } from '../types';
+import { CARD_ERRORS, FIELD_STYLE, VALIDATOR_TO_TYPE_MAP, DEFAULT_CARD_TYPE, GQL_ERRORS, CARD_FIELD_TYPE, VALID_EXTRA_FIELDS } from '../constants';
 import { getActiveElement } from '../../lib/dom';
 
 // Add additional supported card types
@@ -503,4 +503,17 @@ export function parseGQLErrors(errorsObject : Object) : {| parsedErrors : $ReadO
         parsedErrors,
         errorsMap
     };
+}
+
+export function filterExtraFields(extraData : Object) : ExtraFields | Object {
+    if (!extraData || typeof extraData !== 'object' || Array.isArray(extraData)) {
+        return {};
+    }
+
+    return Object.keys(extraData).reduce((acc, key) => {
+        if (VALID_EXTRA_FIELDS.includes(key)) {
+            acc[key] = extraData[key];
+        }
+        return acc;
+    }, {});
 }

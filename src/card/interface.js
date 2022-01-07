@@ -10,7 +10,7 @@ import { tokenizeCard, approveCardPayment } from '../api';
 import { getLogger } from '../lib';
 
 import { getCardProps } from './props';
-import type { Card } from './types';
+import type { Card, ExtraFields } from './types';
 import { type CardExports, type ExportsOptions, parseGQLErrors } from './lib';
 
 function getExportsByFrameName<T>(name : $Values<typeof FRAME_NAME>) : ?CardExports<T> {
@@ -143,7 +143,10 @@ export function resetGQLErrors() : void {
 }
 
 type SubmitCardFieldsOptions = {|
-    facilitatorAccessToken : string
+    facilitatorAccessToken : string,
+    extraFields? : {|
+        billingAddress? : string
+    |}
 |};
 
 type CardValues = {|
@@ -151,10 +154,11 @@ type CardValues = {|
     expirationDate? : string,
     securityCode? : string,
     postalCode? : string,
-    name? : string
+    name? : string,
+    ...ExtraFields
 |};
 
-export function submitCardFields({ facilitatorAccessToken } : SubmitCardFieldsOptions) : ZalgoPromise<void> {
+export function submitCardFields({ facilitatorAccessToken, extraFields } : SubmitCardFieldsOptions) : ZalgoPromise<void> {
     const { intent, branded, vault, createOrder, onApprove, clientID } = getCardProps({ facilitatorAccessToken });
 
     resetGQLErrors();
@@ -186,7 +190,8 @@ export function submitCardFields({ facilitatorAccessToken } : SubmitCardFieldsOp
                 const cardObject : CardValues = {
                     cardNumber:     card.number,
                     expirationDate: card.expiry,
-                    securityCode:   card.cvv
+                    securityCode:   card.cvv,
+                    ...extraFields
                 };
 
                 if (card.name) {

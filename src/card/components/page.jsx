@@ -5,7 +5,7 @@ import { h, render, Fragment } from 'preact';
 import { useState, useEffect } from 'preact/hooks';
 
 import { getBody } from '../../lib';
-import { setupExports, formatFieldValue, autoFocusOnFirstInput } from '../lib';
+import { setupExports, formatFieldValue, autoFocusOnFirstInput, filterExtraFields } from '../lib';
 import { CARD_FIELD_TYPE_TO_FRAME_NAME, CARD_FIELD_TYPE } from '../constants';
 import { submitCardFields } from '../interface';
 import { getCardProps, type CardProps } from '../props';
@@ -81,8 +81,10 @@ function Page({ cspNonce, props } : PageProps) : mixed {
         });
 
         xport({
-            submit: () => {
-                return submitCardFields({ facilitatorAccessToken });
+            submit: (extraData) => {
+                console.log('TEST --->', extraData);
+                const extraFields = filterExtraFields(extraData);
+                return submitCardFields({ facilitatorAccessToken, extraFields });
             }
         });
     }, [ fieldValid, fieldValue ]);

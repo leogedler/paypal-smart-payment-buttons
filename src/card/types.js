@@ -134,3 +134,7 @@ export type InputOptions = {|
     inputState : InputState,
     validationFn : () => mixed
 |};
+
+export type ExtraFields = {|
+    billingAddress? : string
+|};

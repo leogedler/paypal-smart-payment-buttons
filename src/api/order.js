@@ -876,7 +876,8 @@ type ApproveCardPaymentOptions = {|
         expirationDate? : string,
         securityCode? : string,
         postalCode? : string,
-        name? : string
+        name? : string,
+        billingAddress? : string
     |}
 |};
 
