@@ -82,7 +82,6 @@ function Page({ cspNonce, props } : PageProps) : mixed {
 
         xport({
             submit: (extraData) => {
-                console.log('TEST --->', extraData);
                 const extraFields = filterExtraFields(extraData);
                 return submitCardFields({ facilitatorAccessToken, extraFields });
             }
