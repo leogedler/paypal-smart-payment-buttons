@@ -43,14 +43,23 @@ function Page({ cspNonce, props } : PageProps) : mixed {
 
         if (type === CARD_FIELD_TYPE.SINGLE) {
             errorObject.singleField = { ...errorData };
-        } else if (type === CARD_FIELD_TYPE.NUMBER && errors && errors.length) {
-            errorObject.numberField = [ ...errors ];
-        } else if (type === CARD_FIELD_TYPE.EXPIRY && errors && errors.length) {
-            errorObject.expiryField = [ ...errors ];
-        } else if (type === CARD_FIELD_TYPE.CVV && errors && errors.length) {
-            errorObject.cvvField = [ ...errors ];
-        } else if (type === CARD_FIELD_TYPE.NAME && errors && errors.length) {
-            errorObject.nameField = [ ...errors ];
+        } else if (errors && errors.length) {
+            switch (type) {
+            case CARD_FIELD_TYPE.NUMBER:
+                errorObject.numberField = [ ...errors ];
+                break;
+            case CARD_FIELD_TYPE.EXPIRY:
+                errorObject.expiryField = [ ...errors ];
+                break;
+            case CARD_FIELD_TYPE.CVV:
+                errorObject.cvvField = [ ...errors ];
+                break;
+            case CARD_FIELD_TYPE.NAME:
+                errorObject.nameField = [ ...errors ];
+                break;
+            default:
+                break;
+            }
         }
 
         setFieldGQLErrors(errorObject);
