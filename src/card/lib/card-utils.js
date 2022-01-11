@@ -297,7 +297,7 @@ export function setErrors({ isNumberValid, isCvvValid, isExpiryValid, isNameVali
 
     const { field, errors: gqlErrors } = gqlErrorsObject;
 
-    if (typeof isNumberValid === 'boolean' && !isNumberValid) {
+    if (isNumberValid === false) {
 
         if (field === CARD_FIELD_TYPE.NUMBER && gqlErrors.length) {
             errors.push(...gqlErrors);
@@ -306,7 +306,7 @@ export function setErrors({ isNumberValid, isCvvValid, isExpiryValid, isNameVali
         }
     }
 
-    if (typeof isExpiryValid === 'boolean' && !isExpiryValid) {
+    if (isExpiryValid === false) {
 
         if (field === CARD_FIELD_TYPE.EXPIRY  && gqlErrors.length) {
             errors.push(...gqlErrors);
@@ -316,7 +316,7 @@ export function setErrors({ isNumberValid, isCvvValid, isExpiryValid, isNameVali
 
     }
 
-    if (typeof isCvvValid === 'boolean' &&  !isCvvValid) {
+    if (isCvvValid === false) {
 
         if (field === CARD_FIELD_TYPE.CVV  && gqlErrors.length) {
             errors.push(...gqlErrors);
@@ -325,7 +325,7 @@ export function setErrors({ isNumberValid, isCvvValid, isExpiryValid, isNameVali
         }
     }
 
-    if (typeof isNameValid === 'boolean' && !isNameValid) {
+    if (isNameValid === false) {
 
         if (field === CARD_FIELD_TYPE.NAME && gqlErrors.length) {
             errors.push(...gqlErrors);
