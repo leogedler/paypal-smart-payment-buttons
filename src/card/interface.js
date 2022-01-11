@@ -79,7 +79,7 @@ export function getCardFields() : ?Card {
             number: cardNumberFrame.getFieldValue(),
             cvv:    cardCVVFrame.getFieldValue(),
             expiry: cardExpiryFrame.getFieldValue(),
-            name:   cardNameFrame && cardNameFrame.isFieldValid() ? cardNameFrame.getFieldValue() : ''
+            name:   cardNameFrame?.getFieldValue() || ''
         };
     }
 
