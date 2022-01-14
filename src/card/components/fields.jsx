@@ -363,13 +363,13 @@ export function CardNameField({ cspNonce, onChange, styleObject = {}, placeholde
     const [ name, setName ] : [ string, (string) => string ] = useState('');
     const [ nameValidity, setNameValidity ] : [ FieldValidity, (FieldValidity) => FieldValidity ] = useState(initFieldValidity);
     const [ generalStyle, inputStyle ] = getStyles(styleObject);
-    const cvvRef = useRef();
+    const nameRef = useRef();
     
     const composedStyles = { ...{ input: DEFAULT_INPUT_STYLE },  ...generalStyle };
     const { isValid, isPotentiallyValid } = nameValidity;
 
     useEffect(() => {
-        autoFocusRef(cvvRef);
+        autoFocusRef(nameRef);
     }, []);
 
     useEffect(() => {
@@ -392,7 +392,7 @@ export function CardNameField({ cspNonce, onChange, styleObject = {}, placeholde
             </style>
 
             <CardName
-                ref={ cvvRef }
+                ref={ nameRef }
                 type='text'
                 // eslint-disable-next-line react/forbid-component-props
                 className={ `name ${ nameValidity.isPotentiallyValid || nameValidity.isValid ? 'valid' : 'invalid' }` }

@@ -1096,10 +1096,6 @@ describe('card fields cases', () => {
 
                 const cardFields = window.paypal.CardFields(window.xprops);
 
-                window.xprops.type = CARD_FIELD_TYPE.NAME;
-                await mockSetupCardFields();
-                cardFields.NameField(window.xprops).render(nameContainer);
-
                 window.xprops.type = CARD_FIELD_TYPE.NUMBER;
                 await mockSetupCardFields();
                 cardFields.NumberField(window.xprops).render(numberContainer);
@@ -1112,6 +1108,9 @@ describe('card fields cases', () => {
                 await mockSetupCardFields();
                 cardFields.CVVField(window.xprops).render(cvvContainer);
 
+                window.xprops.type = CARD_FIELD_TYPE.NAME;
+                await mockSetupCardFields();
+                cardFields.NameField(window.xprops).render(nameContainer);
             });
 
         });
